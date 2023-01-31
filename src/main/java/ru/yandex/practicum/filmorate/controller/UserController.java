@@ -15,25 +15,25 @@ import java.time.LocalDate;
 import java.util.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping
 @Slf4j
 public class UserController {
     private final HashMap<Integer, User> users = new HashMap<>();
     private int userCount=1;
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return new ArrayList<User>(users.values());
+    @GetMapping("/users")
+    public Collection<User> getAllUsers() {
+        return users.values();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/users")
     public void deleteFilms(){
         users.clear();
         userCount=1;
         log.info("Удаление всех записей пользователей");
     }
 
-    @PostMapping
+    @PostMapping("/users")
     public User addUser(@Valid @RequestBody User user) {
 
         checkUserValidation(user);
@@ -47,7 +47,12 @@ public class UserController {
         return user;
     }
 
-    @PutMapping
+
+    /*С валидацией и путем @PutMapping("/updateUser") то же самое. Нужно чем-то одним валидировать
+    * "Одним валидатором" вы имели в виду, чтобы поле проверялось либо только @NotNull\@NotBlank
+    *  либо только if (user.getName().isBlank()) и не совмещать эти две валидации?  */
+
+    @PutMapping("/users")
     public User updateUser(@Valid @RequestBody User user){
         checkUserValidation(user);
         if(users.containsKey(user.getId())){

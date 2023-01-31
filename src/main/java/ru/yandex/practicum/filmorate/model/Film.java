@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 public class Film {
     @Setter
     private int id;
-    @NotNull (message = "название не может быть пустым")
+    @NotBlank(message = "название не может быть пустым")
     private String name;
     @NotNull (message = "описание не может быть пустым")
     private String description;

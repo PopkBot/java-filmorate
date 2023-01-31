@@ -9,12 +9,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
-@RequestMapping("/films")
+@RequestMapping
 @Slf4j
 public class FilmController {
 
@@ -22,13 +20,13 @@ public class FilmController {
     private int filmCount=1;
 
 
-    @GetMapping
-    public List<Film> getAllFilms() {
-        return new ArrayList<Film>(films.values());
+    @GetMapping("/films")
+    public Collection<Film> getAllFilms() {
+        return films.values();
     }
 
 
-    @PostMapping
+    @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody Film film) {
 
         checkFilmValidation(film);
@@ -42,7 +40,7 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film updateFilm(@Valid @RequestBody Film film){
         checkFilmValidation(film);
         if(films.containsKey(film.getId())){
@@ -54,7 +52,7 @@ public class FilmController {
 
     }
 
-    @DeleteMapping
+    @DeleteMapping("/films")
     public void deleteFilms(){
         films.clear();
         filmCount=1;
@@ -64,10 +62,7 @@ public class FilmController {
     private void checkFilmValidation(Film film){
         StringBuilder message = new StringBuilder().append("Не удалось добавить фильм: ");
         boolean isValid = true;
-        if (film.getName().isBlank()) {
-            message.append("название фильма не может быть пустым; ");
-            isValid = false;
-        }
+
         if (film.getDescription().length() > 200) {
             message.append("описание не должно превышать 200 символов; ");
             isValid = false;
