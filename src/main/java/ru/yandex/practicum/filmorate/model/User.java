@@ -13,10 +13,12 @@ import java.time.LocalDate;
 public class User {
 
     @Setter
+    @EqualsAndHashCode.Exclude
     private int id;
     @Email(message = "неверный формат email")
-    @NotNull (message = "email не может быть пустым")
+    @NotBlank (message = "email не может быть пустым")
     private String email;
+    @NotBlank(message = "логин не может быть пустым")
     private String login;
     @Setter
     private String name;

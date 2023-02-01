@@ -115,6 +115,11 @@ class UserControllerTest {
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users",user1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
+
+        user1 = new User(1,"","l1","n1",LocalDate.of(2000,1,1));
+        postResponse = restTemplate.postForEntity("/users",user1, String.class);
+        System.out.println("Тело ответа: "+postResponse.getBody().toString());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
     }
 
     @Test
@@ -123,9 +128,8 @@ class UserControllerTest {
         User user1 = new User(1, "u1@m.ru", "", "n1", LocalDate.of(2000, 1, 1));
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, postResponse.getStatusCode());
-        Assertions.assertEquals("{\"message\":\"Не удалось добавить пользователя: неверный формат логина; \"}"
-                , postResponse.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, postResponse.getStatusCode());
+
 
         user1 = new User(1, "u1@m.ru", "a a", "n1", LocalDate.of(2000, 1, 1));
         postResponse = restTemplate.postForEntity("/users", user1, String.class);

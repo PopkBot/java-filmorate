@@ -12,10 +12,11 @@ import java.time.LocalDate;
 @ToString
 public class Film {
     @Setter
+    @EqualsAndHashCode.Exclude
     private int id;
     @NotBlank(message = "название не может быть пустым")
     private String name;
-    @NotNull (message = "описание не может быть пустым")
+    @NotBlank (message = "описание не может быть пустым")
     private String description;
     @NotNull (message = "дата выхода не может быть пустой")
     private LocalDate releaseDate;

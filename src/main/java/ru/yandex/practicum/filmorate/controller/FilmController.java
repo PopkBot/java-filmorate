@@ -30,7 +30,7 @@ public class FilmController {
     public Film addFilm(@Valid @RequestBody Film film) {
 
         checkFilmValidation(film);
-        if(films.containsKey(film.getId())){
+        if(films.containsValue(film)){
             throw new InstanceAlreadyExistException("Не удалось добавить фильм: фильм уже существует");
         }
         films.put(filmCount,film);
@@ -71,7 +71,7 @@ public class FilmController {
             message.append("фильм не мог быть выпущен до рождения кино; ");
             isValid = false;
         }
-        if (film.getDuration()<0) {
+        if (film.getDuration()<=0) {
             message.append("длительность фильма должна быть положительной; ");
             isValid = false;
         }

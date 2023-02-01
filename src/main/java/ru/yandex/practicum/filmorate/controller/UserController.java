@@ -37,7 +37,7 @@ public class UserController {
     public User addUser(@Valid @RequestBody User user) {
 
         checkUserValidation(user);
-        if(users.containsKey(user.getId())){
+        if(users.containsValue(user)){
             throw new InstanceAlreadyExistException("Не удалось добавить пользователя: пользователь уже существует");
         }
         users.put(userCount,user);
@@ -66,7 +66,7 @@ public class UserController {
     private void checkUserValidation( User user) {
         StringBuilder message = new StringBuilder().append("Не удалось добавить пользователя: ");
         boolean isValid = true;
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if (user.getLogin().contains(" ")) {
             message.append("неверный формат логина; ");
             isValid = false;
         }
