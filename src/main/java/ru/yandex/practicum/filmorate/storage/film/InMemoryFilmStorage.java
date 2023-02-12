@@ -21,12 +21,22 @@ public class InMemoryFilmStorage implements FilmStorage{
     private final HashMap<Integer, Film> films = new HashMap<>();
     private int filmCount=1;
 
+    /**
+     * Возвращает таблицу всех фильмов
+     * @return - HashMap<Integer,User>
+     */
     @Override
     public HashMap<Integer,Film> getAllFilms() {
         log.info("Запрошен список всех фильмов");
         return films;
     }
 
+    /**
+     * Возвращает фильм по идентификатору
+     * @param id идентификатор фильм, которого необходимо передать
+     * @return Film пользователь с запрошенным id
+     * @throws Exception - фильм с указанным id не найден в таблицу
+     */
     @Override
     public Film getFilmById(int id) throws Exception {
         if(!films.containsKey(id)){
@@ -36,6 +46,11 @@ public class InMemoryFilmStorage implements FilmStorage{
         return films.get(id);
     }
 
+    /**
+     * Добавляет фильм в таблицу
+     * @param film Film добавляемый фильм
+     * @return - Film в случае успешного добавления фильм возвращает добавленный объект
+     */
     @Override
     public Film addFilm(Film film) {
         checkFilmValidation(film);
@@ -50,6 +65,11 @@ public class InMemoryFilmStorage implements FilmStorage{
         return films.get(filmCount-1);
     }
 
+    /**
+     * Обновляет фильм в таблице
+     * @param film обновленная версия фильм, содержит идентификатор Id
+     * @return - Film в случае успешного обновления фильм возвращает добавленный объект
+     */
     @Override
     public Film updateFilm(Film film) {
 
@@ -63,6 +83,11 @@ public class InMemoryFilmStorage implements FilmStorage{
         throw new InstanceNotFoundException("Не удалось обновить фильм: фильм не найден.");
     }
 
+    /**
+     * Удаляет фильм с идентификатором id из таблицы
+     * @param id идентификатор фильм, которого необходимо удалить
+     * @return - User копия удаленного фильм возвращается в случае успешного удаления из таблицы
+     */
     @Override
     public Film deleteFilm(int id) {
 
@@ -75,6 +100,9 @@ public class InMemoryFilmStorage implements FilmStorage{
         return removingFilm;
     }
 
+    /**
+     * Удаляет все фильмы из таблицы, восстанавливает счетчик идентификаторов
+     */
     @Override
     public void deleteAllFilms() {
         filmCount=1;
@@ -82,6 +110,10 @@ public class InMemoryFilmStorage implements FilmStorage{
         log.info("Список фильмов очищен");
     }
 
+    /**
+     * Проверяет поля фильма на корректность
+     * @param film фильм, поля которого необходимо проверить
+     */
     private void checkFilmValidation(Film film){
         StringBuilder message = new StringBuilder().append("Не удалось добавить фильм: ");
         boolean isValid = true;

@@ -20,12 +20,21 @@ public class InMemoryUserStorage implements UserStorage{
     private final HashMap<Integer, User> users = new HashMap<>();
     private int userCount=1;
 
+    /**
+     * Возвращает таблицу всех пользователей
+     * @return - HashMap<Integer,User>
+     */
     @Override
     public HashMap<Integer,User> getAllUsers(){
         log.info("Запрошен список всех пользователей");
         return users;
     }
 
+    /**
+     * Добавляет пользователя в таблицу
+     * @param user User добавляемый пользователь
+     * @return - User в случае успешного добавления пользователя возвращает добавленный объект
+     */
     @Override
     public User addUser(User user) {
         checkUserValidation(user);
@@ -40,6 +49,11 @@ public class InMemoryUserStorage implements UserStorage{
         return user;
     }
 
+    /**
+     * Обновляет пользователя в таблице
+     * @param user обновленная версия пользователя, содержит идентификатор Id
+     * @return - User в случае успешного обновления пользователя возвращает добавленный объект
+     */
     @Override
     public User updateUser(User user) {
 
@@ -54,6 +68,11 @@ public class InMemoryUserStorage implements UserStorage{
 
     }
 
+    /**
+     * Удаляет пользователя с идентификатором id из таблицы
+     * @param id идентификатор пользователя, которого необходимо удалить
+     * @return - User копия удаленного пользователя возвращается в случае успешного удаления из таблицы
+     */
     @Override
     public User deleteUser(int id) {
         if(!users.containsKey(id)){
@@ -65,6 +84,9 @@ public class InMemoryUserStorage implements UserStorage{
         return removingUser;
     }
 
+    /**
+     * Удаляет всех пользователей из таблицы, восстанавливает счетчик идентификаторов
+     */
     @Override
     public void deleteAllUsers() {
         userCount=1;
@@ -72,6 +94,12 @@ public class InMemoryUserStorage implements UserStorage{
         log.info("Список пользователей очищен");
     }
 
+    /**
+     * Возвращает пользователя по идентификатору
+     * @param id идентификатор пользователя, которого необходимо передать
+     * @return User пользователь с запрошенным id
+     * @throws Exception - пользователь с указанным id не найден в таблице
+     */
     @Override
     public User getUserById(int id) throws Exception{
         if(!users.containsKey(id)){
@@ -81,6 +109,10 @@ public class InMemoryUserStorage implements UserStorage{
         return users.get(id);
     }
 
+    /**
+     * Проверяет поля пользователя на корректность
+     * @param user пользователь, чьи поля необходимо проверить
+     */
     private void checkUserValidation( User user) {
         StringBuilder message = new StringBuilder().append("Не удалось добавить пользователя: ");
         boolean isValid = true;

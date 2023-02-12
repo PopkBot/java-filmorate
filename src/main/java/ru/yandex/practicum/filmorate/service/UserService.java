@@ -53,6 +53,13 @@ public class UserService {
         return userStorage.deleteUser(userId);
     }
 
+    /**
+     * Добавляет идентификаторы пользователей в их списки друзей
+     * @param user1Id идентификатор пользователя, который запишется в список идентификаторов-друзей пользователя
+     *                с идентификатором user2Id
+     * @param user2Id идентификатор пользователя, который запишется в список идентификаторов-друзей пользователя
+     *                с идентификатором user1Id
+     */
     public void makeFriends(int user1Id,int user2Id){
 
         if(user1Id==user2Id){
@@ -71,6 +78,11 @@ public class UserService {
         log.info("{} и {} стали друзьями",user1,user2);
     }
 
+    /**
+     * Удаляет идентификаторы пользователей из их списка идентификаторов друзей
+     * @param user1Id идентификатор пользователя, из чьего списка друзей удалится пользователь с идентификатором user2Id
+     * @param user2Id идентификатор пользователя, из чьего списка друзей удалится пользователь с идентификатором user1Id
+     */
     public void deleteFriend(int user1Id, int user2Id){
 
         User user1;
@@ -86,6 +98,11 @@ public class UserService {
         log.info("{} и {} больше не друзья",user1,user2);
     }
 
+    /**
+     * Возвращает список пользователей с идентификаторами, указанными в списке друзей пользователя с указанным идентификатором
+     * @param userId идентификатор пользователя, чьих друзей необходимо передать
+     * @return List<User> список друзей
+     */
     public List<User> getFriends(int userId){
 
         HashSet<Integer> friendIdList;
@@ -103,6 +120,12 @@ public class UserService {
         return friendList;
     }
 
+    /**
+     * Возвращает список пользователей с идентификаторами, общими для списков друзей пользователей user1Id и use2Id
+     * @param user1Id идентификатор 1-го пользователя
+     * @param user2Id идентификатор 2-го пользователя
+     * @return List<User> список друзей
+     */
     public List<User> getMutualFriends(int user1Id,int user2Id){
 
         if(user1Id==user2Id){

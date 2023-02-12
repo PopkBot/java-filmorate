@@ -55,6 +55,11 @@ public class FilmService {
         return filmStorage.getAllFilms();
     }
 
+    /**
+     * Добавляет идентификатор пользователя в список "нравится" фильма с идентификатором filmId
+     * @param filmId идентификатор фильма
+     * @param userId идентификатор пользователя
+     */
     public void addLike(int filmId, int userId){
 
         Film film;
@@ -73,6 +78,11 @@ public class FilmService {
 
     }
 
+    /**
+     * Удаляет идентификатор пользователя из списка "нравится" фильма с идентификатором filmId
+     * @param filmId идентификатор фильма
+     * @param userId идентификатор пользователя
+     */
     public void deleteLike(int filmId, int userId){
 
         Film film;
@@ -90,6 +100,11 @@ public class FilmService {
         log.info("Удален лайк к фильму {} от пользователя с id {}",film,userId);
     }
 
+    /**
+     * Возвращает список фильмов с наибольшим списком "нравится"
+     * @param count размер передаваемого списка фильмов
+     * @return List<Film> список самый популярных фильмов
+     */
     public List<Film> getMostLikedFilms(int count){
 
         if(count<=0){
@@ -97,7 +112,7 @@ public class FilmService {
         }
 
         ArrayList<Film> mostLikedFilms = new ArrayList<>(filmStorage.getAllFilms().values());
-        mostLikedFilms.sort((f1,f2)-> -f1.getLikedUsersId().size()-f2.getLikedUsersId().size());
+        mostLikedFilms.sort((f1,f2)-> -(f1.getLikedUsersId().size()-f2.getLikedUsersId().size()));
         if(count>mostLikedFilms.size()){
             count=mostLikedFilms.size();
         }

@@ -61,7 +61,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public Collection<Film> getMostLikedFilms(@RequestParam(required = false) Integer count){
+    public List<Film> getMostLikedFilms(@RequestParam(required = false) Integer count){
         if(count==null){
             count= Constants.MOST_LIKED_FILMS_NUMBER;
         }
