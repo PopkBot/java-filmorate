@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -22,6 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public HashMap<Integer,Film> getAllFilms() {
+        log.info("Запрошен список всех фильмов");
         return films;
     }
 
@@ -30,16 +32,18 @@ public class InMemoryFilmStorage implements FilmStorage{
         if(!films.containsKey(id)){
             throw new Exception("id = "+id);
         }
+        log.info("Запрошен фильм id = {}",id);
         return films.get(id);
     }
 
     @Override
-    public Film addFilm(@Valid Film film) {
+    public Film addFilm(Film film) {
         checkFilmValidation(film);
         if(films.containsValue(film)){
             throw new InstanceAlreadyExistException("Не удалось добавить фильм: фильм уже существует");
         }
         film.setId(filmCount);
+        film.setLikedUsersId(new HashSet<>());
         films.put(filmCount,film);
         filmCount++;
         log.info("Добавлен фильм {}",film);
@@ -47,11 +51,8 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film updateFilm(@Valid Film film) {
+    public Film updateFilm(Film film) {
 
-        /*if(film.getId()==-1){
-            throw new ValidationException("Не удалось обновить фильм: не указан идентификатор");
-        }*/
         checkFilmValidation(film);
         if(films.containsKey(film.getId())){
             film.setLikedUsersId(films.get(film.getId()).getLikedUsersId());
@@ -72,6 +73,13 @@ public class InMemoryFilmStorage implements FilmStorage{
         films.remove(id);
         log.info("Удален фильм {}",removingFilm);
         return removingFilm;
+    }
+
+    @Override
+    public void deleteAllFilms() {
+        filmCount=1;
+        films.clear();
+        log.info("Список фильмов очищен");
     }
 
     private void checkFilmValidation(Film film){

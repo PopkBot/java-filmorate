@@ -20,6 +20,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,8 +56,8 @@ class UserControllerTest {
     void shouldPostAndReturnValidUser(){
 
 
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
-        User user2 = new User(2,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1));
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
+        User user2 = new User(2,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1),new HashSet<>());
 
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
@@ -79,8 +80,8 @@ class UserControllerTest {
 
     @Test
     void shouldUpdateUser(){
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
-        User user2 = new User(1,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1));
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
+        User user2 = new User(1,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1),new HashSet<>());
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -95,7 +96,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturnIntanceAlreadyExistException(){
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -111,12 +112,12 @@ class UserControllerTest {
     @Test
     void shouldNotAcceptInvalidEmail(){
 
-        User user1 = new User(1,"u1mru","l1","n1",LocalDate.of(2000,1,1));
+        User user1 = new User(1,"u1mru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users",user1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
 
-        user1 = new User(1,"","l1","n1",LocalDate.of(2000,1,1));
+        user1 = new User(1,"","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
         postResponse = restTemplate.postForEntity("/users",user1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
@@ -125,13 +126,13 @@ class UserControllerTest {
     @Test
     void shouldNotAcceptInvalidLogin() {
 
-        User user1 = new User(1, "u1@m.ru", "", "n1", LocalDate.of(2000, 1, 1));
+        User user1 = new User(1, "u1@m.ru", "", "n1", LocalDate.of(2000, 1, 1),new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, postResponse.getStatusCode());
 
 
-        user1 = new User(1, "u1@m.ru", "a a", "n1", LocalDate.of(2000, 1, 1));
+        user1 = new User(1, "u1@m.ru", "a a", "n1", LocalDate.of(2000, 1, 1),new HashSet<>());
         postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, postResponse.getStatusCode());
@@ -141,7 +142,7 @@ class UserControllerTest {
 
     @Test
     void shouldUseLoginIfNameIsBlank(){
-        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1));
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users", user1, User.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK, postResponse.getStatusCode());
@@ -150,7 +151,7 @@ class UserControllerTest {
 
     @Test
     void shouldNotAcceptWrodBirthDate(){
-        User user1 = new User(1, "u1@m.ru", "l1", "n1", LocalDate.now().plusYears(1));
+        User user1 = new User(1, "u1@m.ru", "l1", "n1", LocalDate.now().plusYears(1),new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, postResponse.getStatusCode());

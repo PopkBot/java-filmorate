@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
@@ -14,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final UserStorage userStorage;
@@ -33,6 +35,10 @@ public class UserService {
         } catch (Exception e) {
             throw new InstanceNotFoundException("Пользователь с "+e.getMessage()+" не найден.");
         }
+    }
+
+    public void deleteAllUsers(){
+        userStorage.deleteAllUsers();
     }
 
     public User addUser(User user){
@@ -62,6 +68,7 @@ public class UserService {
         }
         user1.getFriendIdList().add(user2Id);
         user2.getFriendIdList().add(user1Id);
+        log.info("{} и {} стали друзьями",user1,user2);
     }
 
     public void deleteFriend(int user1Id, int user2Id){
@@ -76,6 +83,7 @@ public class UserService {
         }
         user1.getFriendIdList().remove(user2Id);
         user2.getFriendIdList().remove(user1Id);
+        log.info("{} и {} больше не друзья",user1,user2);
     }
 
     public List<User> getFriends(int userId){
@@ -91,6 +99,7 @@ public class UserService {
         for(int id:friendIdList){
             friendList.add(userList.get(id));
         }
+        log.info("Запрошен список друзей пользователя id = {}",userId);
         return friendList;
     }
 
@@ -118,6 +127,7 @@ public class UserService {
                 }
             }
         }
+        log.info("Запрошен список общих друзей пользователей с id {} и {}",user1Id,user2Id);
         return mutualFriends;
 
 

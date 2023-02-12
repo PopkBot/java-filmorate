@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 @Component
 @Slf4j
@@ -21,16 +22,18 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public HashMap<Integer,User> getAllUsers(){
+        log.info("Запрошен список всех пользователей");
         return users;
     }
 
     @Override
-    public User addUser(@Valid User user) {
+    public User addUser(User user) {
         checkUserValidation(user);
         if(users.containsValue(user)){
             throw new InstanceAlreadyExistException("Не удалось добавить пользователя: пользователь уже существует");
         }
         user.setId(userCount);
+        user.setFriendIdList(new HashSet<>());
         users.put(userCount,user);
         userCount++;
         log.info("Добавлен пользователь {}",user);
@@ -38,10 +41,8 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public User updateUser(@Valid User user) {
-        /*if(user.getId()==-1){
-            throw new ValidationException("Не удалось обновить пользователя: не указан идентификатор");
-        }*/
+    public User updateUser(User user) {
+
         checkUserValidation(user);
         if(users.containsKey(user.getId())){
             user.setFriendIdList(users.get(user.getId()).getFriendIdList());
@@ -65,10 +66,18 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
+    public void deleteAllUsers() {
+        userCount=1;
+        users.clear();
+        log.info("Список пользователей очищен");
+    }
+
+    @Override
     public User getUserById(int id) throws Exception{
         if(!users.containsKey(id)){
             throw new Exception("id = "+id);
         }
+        log.info("Запрошен пользователь id = {}",id);
         return users.get(id);
     }
 

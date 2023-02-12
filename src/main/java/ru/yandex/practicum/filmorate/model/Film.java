@@ -24,6 +24,6 @@ public class Film {
     private int duration;
     @Setter
     @EqualsAndHashCode.Exclude
-    private HashSet<Integer> likedUsersId = new HashSet<>();
+    private HashSet<Integer> likedUsersId;
 
 }

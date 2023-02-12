@@ -30,7 +30,7 @@ public class User {
     private LocalDate birthday;
     @EqualsAndHashCode.Exclude
     @Setter
-    private HashSet<Integer> friendIdList = new HashSet();
+    private HashSet<Integer> friendIdList;
 
 
 }

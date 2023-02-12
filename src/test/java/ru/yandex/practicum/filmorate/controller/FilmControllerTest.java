@@ -19,6 +19,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -51,8 +52,8 @@ class FilmControllerTest {
     @Test
     void shouldPostAndReturnValidFilm(){
 
-        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10);
-        Film film2 = new Film(2,"f2","d2",LocalDate.of(2001,1,1),10);
+        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
+        Film film2 = new Film(2,"f2","d2",LocalDate.of(2001,1,1),10,new HashSet<>());
 
         ResponseEntity<Film> postResponse = restTemplate.postForEntity("/films",film1, Film.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
@@ -75,8 +76,8 @@ class FilmControllerTest {
 
     @Test
     void shouldUpdateFilm(){
-        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10);
-        Film film2 = new Film(1,"f2","d2",LocalDate.of(2001,1,1),10);
+        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
+        Film film2 = new Film(1,"f2","d2",LocalDate.of(2001,1,1),10,new HashSet<>());
         ResponseEntity<Film> postResponse = restTemplate.postForEntity("/films",film1, Film.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -91,7 +92,7 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnIntanceAlreadyExistException(){
-        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10);
+        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
         ResponseEntity<Film> postResponse = restTemplate.postForEntity("/films",film1, Film.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -107,7 +108,7 @@ class FilmControllerTest {
     @Test
     void shouldReturnValidationExceptionOnEmptyName(){
 
-        Film film1 = new Film(1," ","d1",LocalDate.of(2000,1,1),10);
+        Film film1 = new Film(1," ","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/films",film1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
@@ -123,7 +124,7 @@ class FilmControllerTest {
         for(int i =0;i<descriptionMaxLength+10;i++){
             stringBuilder.append("a");
         }
-        Film film1 = new Film(1,"a",stringBuilder.toString(),LocalDate.of(2000,1,1),10);
+        Film film1 = new Film(1,"a",stringBuilder.toString(),LocalDate.of(2000,1,1),10,new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/films",film1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST,postResponse.getStatusCode());
@@ -133,7 +134,7 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnValidationExceptionOnWrongReleaseDate(){
-        Film film1 = new Film(1,"n","d",LocalDate.of(1895,12,27),10);
+        Film film1 = new Film(1,"n","d",LocalDate.of(1895,12,27),10,new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/films",film1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST,postResponse.getStatusCode());
@@ -143,7 +144,7 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnValidationExceptionOnNegativeDuration(){
-        Film film1 = new Film(1,"n","d",LocalDate.of(1896,12,27),-10);
+        Film film1 = new Film(1,"n","d",LocalDate.of(1896,12,27),-10,new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/films",film1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST,postResponse.getStatusCode());

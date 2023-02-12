@@ -15,4 +15,6 @@ public interface UserStorage {
     public User updateUser(User film);
 
     public User deleteUser(int id);
+
+    public void deleteAllUsers();
 }

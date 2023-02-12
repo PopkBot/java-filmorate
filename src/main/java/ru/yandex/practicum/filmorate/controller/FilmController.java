@@ -25,6 +25,21 @@ public class FilmController {
         this.filmService=filmService;
     }
 
+    @DeleteMapping("/films")
+    public void deleteAllFilms(){
+        filmService.deleteAllFilms();
+    }
+
+    @PostMapping("/films")
+    public Film addFilm(@Valid @RequestBody Film film){
+        return filmService.addFilm(film);
+    }
+
+    @PutMapping("/films")
+    public Film updateFilm(@Valid @RequestBody Film film){
+        return filmService.updateFilm(film);
+    }
+
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
         return filmService.getAllFilms().values();
@@ -45,8 +60,8 @@ public class FilmController {
         filmService.deleteLike(id,userId);
     }
 
-    @GetMapping("/films/popular?count={count}")
-    public Collection<Film> getMostLikedFilms(@PathVariable(required = false) Integer count){
+    @GetMapping("/films/popular")
+    public Collection<Film> getMostLikedFilms(@RequestParam(required = false) Integer count){
         if(count==null){
             count= Constants.MOST_LIKED_FILMS_NUMBER;
         }

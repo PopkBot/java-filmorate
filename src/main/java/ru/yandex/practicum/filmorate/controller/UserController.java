@@ -27,6 +27,21 @@ public class UserController {
         this.userService=userService;
     }
 
+    @DeleteMapping("/users")
+    public void deleteAllUsers(){
+        userService.deleteAllUsers();
+    }
+
+    @PostMapping("/users")
+    public User addUser(@Valid @RequestBody User user){
+        return userService.addUser(user);
+    }
+
+    @PutMapping("/users")
+    public User updateUser(@Valid @RequestBody User user){
+        return userService.updateUser(user);
+    }
+
     @GetMapping("/users")
     public Collection<User> getAllUsers(){
         return userService.getAllUsers().values();
