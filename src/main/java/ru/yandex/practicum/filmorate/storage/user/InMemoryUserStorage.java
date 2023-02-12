@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,25 +19,26 @@ public class InMemoryUserStorage implements UserStorage{
     private final HashMap<Integer, User> users = new HashMap<>();
     private int userCount=1;
 
-    public Collection<User> getAllUsers(){
-        return (Collection<User>) users;
+    @Override
+    public HashMap<Integer,User> getAllUsers(){
+        return users;
     }
 
     @Override
-    public User addUser(User user) {
+    public User addUser(@Valid User user) {
         checkUserValidation(user);
         if(users.containsValue(user)){
             throw new InstanceAlreadyExistException("Не удалось добавить пользователя: пользователь уже существует");
         }
-        users.put(userCount,user);
         user.setId(userCount);
+        users.put(userCount,user);
         userCount++;
         log.info("Добавлен пользователь {}",user);
         return user;
     }
 
     @Override
-    public User updateUser(User user) {
+    public User updateUser(@Valid User user) {
         /*if(user.getId()==-1){
             throw new ValidationException("Не удалось обновить пользователя: не указан идентификатор");
         }*/
@@ -62,7 +64,8 @@ public class InMemoryUserStorage implements UserStorage{
         return removingUser;
     }
 
-    public User getUser(int id) throws Exception{
+    @Override
+    public User getUserById(int id) throws Exception{
         if(!users.containsKey(id)){
             throw new Exception("id = "+id);
         }

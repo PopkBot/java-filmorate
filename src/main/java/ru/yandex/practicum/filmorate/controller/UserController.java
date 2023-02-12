@@ -17,39 +17,47 @@ import java.time.LocalDate;
 import java.util.*;
 
 @RestController
-@RequestMapping
 @Slf4j
 public class UserController {
 
-    private InMemoryUserStorage userStorage;
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
-    public UserController(InMemoryUserStorage userStorage,UserService userService){
+    public UserController(UserService userService){
         this.userService=userService;
-        this.userStorage=userStorage;
     }
 
     @GetMapping("/users")
-    public Collection<User> getAllUsers() {
-        return userStorage.getAllUsers();
+    public Collection<User> getAllUsers(){
+        return userService.getAllUsers().values();
+    }
+
+    @GetMapping("/users/{id}")
+    public User  getUserById(@PathVariable int id){
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public void makeFriend(@PathVariable int id,@PathVariable int friendId){
+        userService.makeFriends(id,friendId);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id,@PathVariable int friendId){
+        userService.deleteFriend(id,friendId);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> getUserFriends(@PathVariable int id){
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getMutualFriends(@PathVariable int id, @PathVariable int otherId){
+        return userService.getMutualFriends(id,otherId);
     }
 
 
-    @PostMapping("/users")
-    public User addUser(@Valid @RequestBody User user) {
-
-
-        return user;
-    }
-
-
-
-    @PutMapping("/users")
-    public User updateUser(@Valid @RequestBody User user){
-
-            return user;
-    }
 
 
 }

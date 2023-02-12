@@ -7,8 +7,11 @@ import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -18,7 +21,20 @@ public class InMemoryFilmStorage implements FilmStorage{
     private int filmCount=1;
 
     @Override
-    public Film addFilm(Film film) {
+    public HashMap<Integer,Film> getAllFilms() {
+        return films;
+    }
+
+    @Override
+    public Film getFilmById(int id) throws Exception {
+        if(!films.containsKey(id)){
+            throw new Exception("id = "+id);
+        }
+        return films.get(id);
+    }
+
+    @Override
+    public Film addFilm(@Valid Film film) {
         checkFilmValidation(film);
         if(films.containsValue(film)){
             throw new InstanceAlreadyExistException("Не удалось добавить фильм: фильм уже существует");
@@ -31,13 +47,14 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film updateFilm(@Valid Film film) {
 
         /*if(film.getId()==-1){
             throw new ValidationException("Не удалось обновить фильм: не указан идентификатор");
         }*/
         checkFilmValidation(film);
         if(films.containsKey(film.getId())){
+            film.setLikedUsersId(films.get(film.getId()).getLikedUsersId());
             films.replace(film.getId(),film);
             log.info("Обновлен фильм {}",film);
             return film;

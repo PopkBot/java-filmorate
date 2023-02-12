@@ -2,26 +2,50 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.InternalErrorException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class UserService {
 
-    private InMemoryUserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage userStorage){
+    public UserService(UserStorage userStorage){
         this.userStorage=userStorage;
     }
 
+    public HashMap<Integer,User> getAllUsers(){
+        return userStorage.getAllUsers();
+    }
+
+    public User getUserById(int id){
+        try {
+            return userStorage.getUserById(id);
+        } catch (Exception e) {
+            throw new InstanceNotFoundException("Пользователь с "+e.getMessage()+" не найден.");
+        }
+    }
+
+    public User addUser(User user){
+        return userStorage.addUser(user);
+    }
+
+    public User updateUser(User user){
+        return userStorage.updateUser(user);
+    }
+
+    public User deleteUserById(int userId){
+        return userStorage.deleteUser(userId);
+    }
 
     public void makeFriends(int user1Id,int user2Id){
 
@@ -31,10 +55,10 @@ public class UserService {
         User user1;
         User user2;
         try {
-            user1=userStorage.getUser(user1Id);
-            user2=userStorage.getUser(user2Id);
+            user1=userStorage.getUserById(user1Id);
+            user2=userStorage.getUserById(user2Id);
         } catch (Exception e) {
-            throw new ValidationException("Не удалось добавить в друзья: пользователь с "+e.getMessage()+" не найден.");
+            throw new InstanceNotFoundException("Не удалось добавить в друзья: пользователь с "+e.getMessage()+" не найден.");
         }
         user1.getFriendIdList().add(user2Id);
         user2.getFriendIdList().add(user1Id);
@@ -45,16 +69,32 @@ public class UserService {
         User user1;
         User user2;
         try {
-            user1=userStorage.getUser(user1Id);
-            user2=userStorage.getUser(user2Id);
+            user1=userStorage.getUserById(user1Id);
+            user2=userStorage.getUserById(user2Id);
         } catch (Exception e) {
-            throw new ValidationException("Не удалось удалить из друзей: пользователь с "+e.getMessage()+" не найден.");
+            throw new InstanceNotFoundException("Не удалось удалить из друзей: пользователь с "+e.getMessage()+" не найден.");
         }
         user1.getFriendIdList().remove(user2Id);
         user2.getFriendIdList().remove(user1Id);
     }
 
-    public ArrayList<User> getMutualFriends(int user1Id,int user2Id){
+    public List<User> getFriends(int userId){
+
+        HashSet<Integer> friendIdList;
+        List<User> friendList = new ArrayList<>();
+        HashMap<Integer,User> userList = userStorage.getAllUsers();
+        try {
+            friendIdList = userStorage.getUserById(userId).getFriendIdList();
+        } catch (Exception e) {
+            throw new InstanceNotFoundException("Не удалось найти друзей: пользователь с "+e.getMessage()+" не найден.");
+        }
+        for(int id:friendIdList){
+            friendList.add(userList.get(id));
+        }
+        return friendList;
+    }
+
+    public List<User> getMutualFriends(int user1Id,int user2Id){
 
         if(user1Id==user2Id){
             throw new ValidationException("Пользователь разделяет с собой всех своих друзей :D");
@@ -62,17 +102,17 @@ public class UserService {
         HashSet<Integer> user1FriendList;
         HashSet<Integer> user2FriendList;
         try {
-            user1FriendList=userStorage.getUser(user1Id).getFriendIdList();
-            user2FriendList=userStorage.getUser(user2Id).getFriendIdList();
+            user1FriendList=userStorage.getUserById(user1Id).getFriendIdList();
+            user2FriendList=userStorage.getUserById(user2Id).getFriendIdList();
         } catch (Exception e) {
-            throw new ValidationException("Не удалось найти общих друзей: пользователь с "+e.getMessage()+" не найден.");
+            throw new InstanceNotFoundException("Не удалось найти общих друзей: пользователь с "+e.getMessage()+" не найден.");
         }
-        ArrayList<User> mutualFriends = new ArrayList<>();
+        List<User> mutualFriends = new ArrayList<>();
 
         for(int i: user1FriendList){
             if(user2FriendList.contains(i)){
                 try {
-                    mutualFriends.add(userStorage.getUser(i));
+                    mutualFriends.add(userStorage.getUserById(i));
                 } catch (Exception e) {
                     throw new InternalErrorException("Что-то пошло не так :Р");
                 }

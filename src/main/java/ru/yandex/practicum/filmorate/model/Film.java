@@ -5,6 +5,7 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashSet;
 
 @AllArgsConstructor
 @Getter
@@ -21,4 +22,8 @@ public class Film {
     @NotNull (message = "дата выхода не может быть пустой")
     private LocalDate releaseDate;
     private int duration;
+    @Setter
+    @EqualsAndHashCode.Exclude
+    private HashSet<Integer> likedUsersId = new HashSet<>();
+
 }
