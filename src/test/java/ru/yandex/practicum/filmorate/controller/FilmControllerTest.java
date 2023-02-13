@@ -187,7 +187,7 @@ class FilmControllerTest {
     @Test
     void shouldReturnExceptionWhenDeletingLikeFromNotExistingFilm(){
 
-        String expectedResponse = "{\"message\":\"Не удалось удалить лайк: фильм не найден\"}";
+        String expectedResponse = "{\"message\":\"Фильм с id 1111 не найден.\"}";
         User user = new User(1,"a@m.r","l1","n1",LocalDate.now(),new HashSet<>());
         HttpEntity<User> entity = new HttpEntity<>(user);
         restTemplate.exchange("/users",HttpMethod.POST,entity,User.class);
@@ -199,7 +199,7 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnExceptionWhenDeletingLikeOfNotExistingUser(){
-        String expectedResponse = "{\"message\":\"Не удалось поставить лайк: пользователь не найден\"}";
+        String expectedResponse = "{\"message\":\"Пользователь с id 1111 не найден.\"}";
         Film film = new Film(1,"n","d",LocalDate.now(),10,new HashSet<>());
         HttpEntity<Film> entity = new HttpEntity<>(film);
         restTemplate.exchange("/films",HttpMethod.POST,entity,Film.class);

@@ -236,6 +236,8 @@ class UserControllerTest {
         User user1 = new User(1, "u1@m.ru", "l1", "l3", LocalDate.of(2000, 1, 1),new HashSet<>());
         User user2 = new User(2, "u2@m.ru", "l2", "l2", LocalDate.of(2000, 1, 1),new HashSet<>(Set.of(1,3)));
         User user3 = new User(3, "u3@m.ru", "l3", "l3", LocalDate.of(2000, 1, 1),new HashSet<>());
+        User user4 = new User(4, "u4@m.ru", "l4", "l4", LocalDate.of(2000, 1, 1),new HashSet<>());
+
         HttpEntity<User> userEntity;
 
         userEntity = new HttpEntity<>(user1);
@@ -244,9 +246,12 @@ class UserControllerTest {
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
         userEntity = new HttpEntity<>(user3);
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        userEntity = new HttpEntity<>(user4);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
 
         restTemplate.exchange("/users/1/friends/2",HttpMethod.PUT,null,String.class);
         restTemplate.exchange("/users/3/friends/2",HttpMethod.PUT,null,String.class);
+        restTemplate.exchange("/users/1/friends/4",HttpMethod.PUT,null,String.class);
 
         ResponseEntity<List<User>> getResponse = restTemplate.exchange("/users/1/friends/common/3", HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<User>>() {});

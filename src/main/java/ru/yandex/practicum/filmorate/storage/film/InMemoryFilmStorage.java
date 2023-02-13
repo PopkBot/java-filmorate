@@ -3,16 +3,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.customExceptions.InstanceAlreadyExistException;
-import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
+import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -27,7 +24,7 @@ public class InMemoryFilmStorage implements FilmStorage{
      */
     @Override
     public HashMap<Integer,Film> getAllFilms() {
-        log.info("Запрошен список всех фильмов");
+        log.info("Передан список всех фильмов");
         return films;
     }
 
@@ -35,14 +32,13 @@ public class InMemoryFilmStorage implements FilmStorage{
      * Возвращает фильм по идентификатору
      * @param id идентификатор фильм, которого необходимо передать
      * @return Film пользователь с запрошенным id
-     * @throws Exception - фильм с указанным id не найден в таблицу
      */
     @Override
-    public Film getFilmById(int id) throws Exception {
+    public Film getFilmById(int id) {
         if(!films.containsKey(id)){
-            throw new Exception("id = "+id);
+            throw new DataNotFoundException("Фильм с id "+id+" не найден.");
         }
-        log.info("Запрошен фильм id = {}",id);
+        log.info("Передан фильм id = {}",id);
         return films.get(id);
     }
 
@@ -80,7 +76,7 @@ public class InMemoryFilmStorage implements FilmStorage{
             log.info("Обновлен фильм {}",film);
             return film;
         }
-        throw new InstanceNotFoundException("Не удалось обновить фильм: фильм не найден.");
+        throw new DataNotFoundException("Не удалось обновить фильм: фильм не найден.");
     }
 
     /**
@@ -92,7 +88,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     public Film deleteFilm(int id) {
 
         if(!films.containsKey(id)){
-            throw new InstanceNotFoundException("Не удалось удалить фильм: фильм не найден.");
+            throw new DataNotFoundException("Не удалось удалить фильм: фильм не найден.");
         }
         Film removingFilm = films.get(id);
         films.remove(id);

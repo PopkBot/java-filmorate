@@ -3,13 +3,11 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.customExceptions.InstanceAlreadyExistException;
-import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
+import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -64,7 +62,7 @@ public class InMemoryUserStorage implements UserStorage{
             log.info("Обновлен пользователь {}",user);
             return user;
         }
-        throw new InstanceNotFoundException("Не удалось обновить пользователя: пользователь не найден.");
+        throw new DataNotFoundException("Не удалось обновить пользователя: пользователь не найден.");
 
     }
 
@@ -76,7 +74,7 @@ public class InMemoryUserStorage implements UserStorage{
     @Override
     public User deleteUser(int id) {
         if(!users.containsKey(id)){
-            throw new InstanceNotFoundException("Не удалось удалить пользователя: пользователь не найден.");
+            throw new DataNotFoundException("Не удалось удалить пользователя: пользователь не найден.");
         }
         User removingUser = users.get(id);
         users.remove(id);
@@ -101,11 +99,11 @@ public class InMemoryUserStorage implements UserStorage{
      * @throws Exception - пользователь с указанным id не найден в таблице
      */
     @Override
-    public User getUserById(int id) throws Exception{
+    public User getUserById(int id){
         if(!users.containsKey(id)){
-            throw new Exception("id = "+id);
+            throw new DataNotFoundException("Пользователь с id "+id+" не найден.");
         }
-        log.info("Запрошен пользователь id = {}",id);
+        log.info("Передан пользователь id = {}",id);
         return users.get(id);
     }
 

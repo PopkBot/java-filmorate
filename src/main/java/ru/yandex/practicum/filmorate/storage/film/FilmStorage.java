@@ -11,7 +11,7 @@ public interface FilmStorage {
 
     public HashMap<Integer,Film> getAllFilms();
 
-    public Film getFilmById(int id) throws Exception;
+    public Film getFilmById(int id);
 
     public Film addFilm(Film film);
 

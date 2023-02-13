@@ -5,9 +5,7 @@ import lombok.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 @AllArgsConstructor

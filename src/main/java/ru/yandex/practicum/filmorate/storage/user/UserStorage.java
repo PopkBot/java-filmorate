@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public interface UserStorage {
 
-    public User getUserById(int id) throws Exception;
+    public User getUserById(int id);
 
     public HashMap<Integer,User> getAllUsers();
 
