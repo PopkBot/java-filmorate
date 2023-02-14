@@ -20,7 +20,9 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,8 +57,8 @@ class UserControllerTest {
     void shouldPostAndReturnValidUser(){
 
 
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
-        User user2 = new User(2,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1));
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
+        User user2 = new User(2,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1),new HashSet<>());
 
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
@@ -79,8 +81,8 @@ class UserControllerTest {
 
     @Test
     void shouldUpdateUser(){
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
-        User user2 = new User(1,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1));
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
+        User user2 = new User(1,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1),new HashSet<>());
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -94,8 +96,8 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldReturnIntanceAlreadyExistException(){
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
+    void shouldReturnInstanceAlreadyExistException(){
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -111,12 +113,12 @@ class UserControllerTest {
     @Test
     void shouldNotAcceptInvalidEmail(){
 
-        User user1 = new User(1,"u1mru","l1","n1",LocalDate.of(2000,1,1));
+        User user1 = new User(1,"u1mru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users",user1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
 
-        user1 = new User(1,"","l1","n1",LocalDate.of(2000,1,1));
+        user1 = new User(1,"","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
         postResponse = restTemplate.postForEntity("/users",user1, String.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,postResponse.getStatusCode());
@@ -125,13 +127,13 @@ class UserControllerTest {
     @Test
     void shouldNotAcceptInvalidLogin() {
 
-        User user1 = new User(1, "u1@m.ru", "", "n1", LocalDate.of(2000, 1, 1));
+        User user1 = new User(1, "u1@m.ru", "", "n1", LocalDate.of(2000, 1, 1),new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, postResponse.getStatusCode());
 
 
-        user1 = new User(1, "u1@m.ru", "a a", "n1", LocalDate.of(2000, 1, 1));
+        user1 = new User(1, "u1@m.ru", "a a", "n1", LocalDate.of(2000, 1, 1),new HashSet<>());
         postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, postResponse.getStatusCode());
@@ -141,7 +143,7 @@ class UserControllerTest {
 
     @Test
     void shouldUseLoginIfNameIsBlank(){
-        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1));
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users", user1, User.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK, postResponse.getStatusCode());
@@ -149,12 +151,115 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldNotAcceptWrodBirthDate(){
-        User user1 = new User(1, "u1@m.ru", "l1", "n1", LocalDate.now().plusYears(1));
+    void shouldNotAcceptWrongBirthDate(){
+        User user1 = new User(1, "u1@m.ru", "l1", "n1", LocalDate.now().plusYears(1),new HashSet<>());
         ResponseEntity<String> postResponse = restTemplate.postForEntity("/users", user1, String.class);
         System.out.println("Тело ответа: " + postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, postResponse.getStatusCode());
         Assertions.assertEquals("{\"message\":\"Не удалось добавить пользователя: пользователь из будущего; \"}"
                 , postResponse.getBody());
     }
+
+    @Test
+    void shouldNotAddFriendSameUser(){
+
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+        HttpEntity<User> userEntity = new HttpEntity<>(user1);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        ResponseEntity<String> putResponse = restTemplate.exchange("/users/1/friends/1",HttpMethod.PUT,null,String.class);
+        System.out.println(putResponse.getBody());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST,putResponse.getStatusCode());
+
+    }
+
+    @Test
+    void shouldNotAddNotExistingFriend(){
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+        HttpEntity<User> userEntity = new HttpEntity<>(user1);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        ResponseEntity<String> putResponse = restTemplate.exchange("/users/1/friends/2222",HttpMethod.PUT,null,String.class);
+        System.out.println(putResponse.getBody());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND,putResponse.getStatusCode());
+    }
+
+    @Test
+    void shouldAddFriend(){
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+        User user2 = new User(2, "u2@m.ru", "l2", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+
+        HttpEntity<User> userEntity = new HttpEntity<>(user1);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        userEntity = new HttpEntity<>(user2);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        ResponseEntity<String> putResponse = restTemplate.exchange("/users/1/friends/2",HttpMethod.PUT,null,String.class);
+        System.out.println(putResponse.getBody());
+        Assertions.assertEquals(HttpStatus.OK,putResponse.getStatusCode());
+        ResponseEntity<User> getResponse = restTemplate.exchange("/users/1",HttpMethod.GET,null,User.class);
+        Assertions.assertEquals(1,getResponse.getBody().getFriendIdList().size());
+
+
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeletingNonExistingFriend(){
+
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+
+        HttpEntity<User> userEntity = new HttpEntity<>(user1);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        ResponseEntity<String> deleteResponse = restTemplate.exchange("/users/1/friends/222",HttpMethod.DELETE,null,String.class);
+        System.out.println(deleteResponse.getBody());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND,deleteResponse.getStatusCode());
+    }
+
+    @Test
+    void shouldDeleteFriendWhenInvokedProperly(){
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+        User user2 = new User(2, "u2@m.ru", "l2", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+
+        HttpEntity<User> userEntity = new HttpEntity<>(user1);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        userEntity = new HttpEntity<>(user2);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        restTemplate.exchange("/users/1/friends/2",HttpMethod.PUT,null,String.class);
+        ResponseEntity<String> deleteResponse = restTemplate.exchange("/users/1/friends/2",HttpMethod.DELETE,null,String.class);
+        System.out.println(deleteResponse.getBody());
+        Assertions.assertEquals(HttpStatus.OK,deleteResponse.getStatusCode());
+
+        ResponseEntity<User> getResponse = restTemplate.exchange("/users/1",HttpMethod.GET,null,User.class);
+        Assertions.assertEquals(0,getResponse.getBody().getFriendIdList().size());
+    }
+
+    @Test
+    void shouldReturnMutualFriendsList(){
+        User user1 = new User(1, "u1@m.ru", "l1", "l3", LocalDate.of(2000, 1, 1),new HashSet<>());
+        User user2 = new User(2, "u2@m.ru", "l2", "l2", LocalDate.of(2000, 1, 1),new HashSet<>(Set.of(1,3)));
+        User user3 = new User(3, "u3@m.ru", "l3", "l3", LocalDate.of(2000, 1, 1),new HashSet<>());
+        User user4 = new User(4, "u4@m.ru", "l4", "l4", LocalDate.of(2000, 1, 1),new HashSet<>());
+
+        HttpEntity<User> userEntity;
+
+        userEntity = new HttpEntity<>(user1);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        userEntity = new HttpEntity<>(user2);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        userEntity = new HttpEntity<>(user3);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+        userEntity = new HttpEntity<>(user4);
+        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
+
+        restTemplate.exchange("/users/1/friends/2",HttpMethod.PUT,null,String.class);
+        restTemplate.exchange("/users/3/friends/2",HttpMethod.PUT,null,String.class);
+        restTemplate.exchange("/users/1/friends/4",HttpMethod.PUT,null,String.class);
+
+        ResponseEntity<List<User>> getResponse = restTemplate.exchange("/users/1/friends/common/3", HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<User>>() {});
+        List<User> expectedMutualFriendsList = new ArrayList<>(List.of(user2));
+        Assertions.assertEquals(expectedMutualFriendsList,getResponse.getBody());
+
+
+
+    }
+
 }

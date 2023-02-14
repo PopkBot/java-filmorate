@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashSet;
 
 @AllArgsConstructor
 @Getter
@@ -16,15 +18,17 @@ public class User {
     @EqualsAndHashCode.Exclude
     private int id;
     @Email(message = "неверный формат email")
-    @NotBlank (message = "email не может быть пустым")
+    @NotBlank(message = "email не может быть пустым")
     private String email;
     @NotBlank(message = "логин не может быть пустым")
     private String login;
     @Setter
     private String name;
-    @NotNull (message = "дата рождения не может быть пустой")
+    @NotNull(message = "дата рождения не может быть пустой")
     private LocalDate birthday;
-
+    @EqualsAndHashCode.Exclude
+    @Setter
+    private HashSet<Integer> friendIdList;
 
 
 }

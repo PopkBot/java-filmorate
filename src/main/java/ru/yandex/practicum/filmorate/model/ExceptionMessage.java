@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ErrorMessage {
+public class ExceptionMessage {
     private String message;
 }

@@ -3,82 +3,77 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.customExceptions.InstanceAlreadyExistException;
-import ru.yandex.practicum.filmorate.customExceptions.InstanceNotFoundException;
-import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController
-@RequestMapping
 @Slf4j
 public class UserController {
-    private final HashMap<Integer, User> users = new HashMap<>();
-    private int userCount=1;
 
-    @GetMapping("/users")
-    public Collection<User> getAllUsers() {
-        return users.values();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService){
+        this.userService=userService;
     }
 
     @DeleteMapping("/users")
-    public void deleteFilms(){
-        users.clear();
-        userCount=1;
-        log.info("Удаление всех записей пользователей");
+    public void deleteAllUsers(){
+        log.info("Запрос: удалить всех пользователей");
+        userService.deleteAllUsers();
     }
 
     @PostMapping("/users")
-    public User addUser(@Valid @RequestBody User user) {
-
-        checkUserValidation(user);
-        if(users.containsValue(user)){
-            throw new InstanceAlreadyExistException("Не удалось добавить пользователя: пользователь уже существует");
-        }
-        users.put(userCount,user);
-        user.setId(userCount);
-        userCount++;
-        log.info("Добавлен пользователь {}",user);
-        return user;
+    public User addUser(@Valid @RequestBody User user){
+        log.info("Запрос: добавить пользователя {}",user);
+        return userService.addUser(user);
     }
-
-
-    /*С валидацией и путем @PutMapping("/updateUser") то же самое. Нужно чем-то одним валидировать
-    * "Одним валидатором" вы имели в виду, чтобы поле проверялось либо только @NotNull\@NotBlank
-    *  либо только if (user.getName().isBlank()) и не совмещать эти две валидации?  */
 
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody User user){
-        checkUserValidation(user);
-        if(users.containsKey(user.getId())){
-            users.replace(user.getId(),user);
-            log.info("Обновлен пользователь {}",user);
-            return user;
-        }
-        throw new InstanceNotFoundException("Не удалось обновить пользователя: пользователь не найден.");
+        log.info("Запрос: обновить пользователя {}",user);
+        return userService.updateUser(user);
     }
 
-    private void checkUserValidation( User user) {
-        StringBuilder message = new StringBuilder().append("Не удалось добавить пользователя: ");
-        boolean isValid = true;
-        if (user.getLogin().contains(" ")) {
-            message.append("неверный формат логина; ");
-            isValid = false;
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            message.append("пользователь из будущего; ");
-            isValid = false;
-        }
-        if (!isValid) {
-            throw new ValidationException(message.toString());
-        }
+    @GetMapping("/users")
+    public Collection<User> getAllUsers(){
+        log.info("Запрос: передать всех пользователей");
+        return userService.getAllUsers().values();
     }
+
+    @GetMapping("/users/{id}")
+    public User  getUserById(@PathVariable int id){
+        log.info("Запрос: передать пользователя с id {}",id);
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public void makeFriend(@PathVariable int id,@PathVariable int friendId){
+        log.info("Запрос: сделать пользователей {} и {} друзьями",id,friendId);
+        userService.makeFriends(id,friendId);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id,@PathVariable int friendId){
+        log.info("Запрос: удалить пользователей из друзей {} и {}",id,friendId);
+        userService.deleteFriend(id,friendId);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> getUserFriends(@PathVariable int id){
+        log.info("Запрос: передать всех друзей пользователя {}",id);
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getMutualFriends(@PathVariable int id, @PathVariable int otherId){
+        log.info("Запрос: передать общих друзей пользователей {} и {}",id,otherId);
+        return userService.getMutualFriends(id,otherId);
+    }
+
 }
