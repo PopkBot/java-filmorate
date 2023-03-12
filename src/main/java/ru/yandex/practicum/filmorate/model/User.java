@@ -6,6 +6,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
 
 @AllArgsConstructor
@@ -29,6 +30,13 @@ public class User {
     @EqualsAndHashCode.Exclude
     @Setter
     private HashSet<Integer> friendIdList;
+    @Setter
+    @EqualsAndHashCode.Exclude
+    private HashMap<Integer,FriendStatus> friendStatuses = new HashMap<>();
 
+    public enum FriendStatus{
+        NOT_ACCEPTED,
+        ACCEPTED;
+    }
 
 }

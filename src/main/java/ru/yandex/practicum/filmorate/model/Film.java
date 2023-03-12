@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 @Getter
@@ -25,5 +26,38 @@ public class Film {
     @Setter
     @EqualsAndHashCode.Exclude
     private HashSet<Integer> likedUsersId;
+    @Setter
+    private
+    Set<Genre> genreSet=new HashSet<>();
+    @Setter
+    private Set<RatingMPA> ratingMPASet = new HashSet<>();
 
+
+    public enum Genre{
+        Comedy,
+        Drama,
+        Cartoon,
+        Thriller,
+        Documentary,
+        Action;
+    }
+
+    public enum RatingMPA{
+        G("G"),
+        PG("PG"),
+        PG_13("PG-13"),
+        R("R"),
+        NC_17("NC-17");
+
+        private String ratingName;
+
+        RatingMPA(String s) {
+            this.ratingName=s;
+        }
+        public String getRatingName(){
+            return ratingName;
+        }
+    }
 }
+
+
