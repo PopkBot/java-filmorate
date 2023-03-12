@@ -30,7 +30,17 @@ public class Film {
     private
     Set<Genre> genreSet=new HashSet<>();
     @Setter
-    private Set<RatingMPA> ratingMPASet = new HashSet<>();
+    private RatingMPA ratingMPASet;
+
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, HashSet<Integer> likedUsersId) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.likedUsersId = likedUsersId;
+    }
+
 
 
     public enum Genre{

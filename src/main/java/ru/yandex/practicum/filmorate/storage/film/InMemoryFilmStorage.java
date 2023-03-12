@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 
-@Component
+@Component("InMemoryFilmStorage")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage{
 

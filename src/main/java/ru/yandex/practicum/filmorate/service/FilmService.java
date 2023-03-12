@@ -2,27 +2,27 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Service
+@Service("FilmService")
 @Slf4j
 public class FilmService {
 
 
-    private final UserStorage userStorage;
+    private final UserDbStorage userStorage;
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(UserStorage userStorage, FilmStorage filmStorage) {
+    public FilmService(UserDbStorage userStorage, FilmStorage filmStorage) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
     }

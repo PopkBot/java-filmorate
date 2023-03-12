@@ -3,22 +3,20 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
-import ru.yandex.practicum.filmorate.customExceptions.InternalErrorException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.*;
 
-@Service
+@Service("UserService")
 @Slf4j
 public class UserService {
 
-    private final UserStorage userStorage;
+    private final UserDbStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(UserDbStorage userStorage) {
         this.userStorage = userStorage;
     }
 

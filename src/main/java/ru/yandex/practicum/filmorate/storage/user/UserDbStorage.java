@@ -4,7 +4,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.HashMap;
 
-public interface UserStorage {
+public interface UserDbStorage {
 
     public User getUserById(int id);
 
