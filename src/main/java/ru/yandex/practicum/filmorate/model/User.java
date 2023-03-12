@@ -23,13 +23,14 @@ public class User {
     private String email;
     @NotBlank(message = "логин не может быть пустым")
     private String login;
+    @EqualsAndHashCode.Exclude
     private String name;
     @NotNull(message = "дата рождения не может быть пустой")
     private LocalDate birthday;
     @EqualsAndHashCode.Exclude
-    private HashSet<Integer> friendIdList;
+    private HashSet<Integer> friendIdList=new HashSet<>();
     @EqualsAndHashCode.Exclude
-    private HashMap<Integer,FriendStatus> friendStatuses;
+    private HashMap<Integer,FriendStatus> friendStatuses=new HashMap<>();
 
     public User(int id, String email, String login, String name, LocalDate birthday, HashSet<Integer> friendIdList) {
         this.id = id;

@@ -13,7 +13,6 @@ import java.util.*;
 
 @RestController
 @Slf4j
-@Qualifier("FilmService")
 public class FilmController {
 
     private final FilmService filmService;

@@ -57,13 +57,8 @@ public class UserService {
         if (user1Id == user2Id) {
             throw new ValidationException("Пользователь не может добавить себя в друзья :(");
         }
-        User user1;
-        User user2;
-        user1 = userStorage.getUserById(user1Id);
-        user2 = userStorage.getUserById(user2Id);
-        user1.getFriendIdList().add(user2Id);
-        user2.getFriendIdList().add(user1Id);
-        log.info("{} и {} стали друзьями", user1, user2);
+        userStorage.makeFriends(user1Id,user2Id);
+        log.info("{} и {} стали друзьями", user1Id, user2Id);
     }
 
     /**
@@ -74,13 +69,8 @@ public class UserService {
      */
     public void deleteFriend(int user1Id, int user2Id) {
 
-        User user1;
-        User user2;
-        user1 = userStorage.getUserById(user1Id);
-        user2 = userStorage.getUserById(user2Id);
-        user1.getFriendIdList().remove(user2Id);
-        user2.getFriendIdList().remove(user1Id);
-        log.info("{} и {} больше не друзья", user1, user2);
+        userStorage.deleteFriends(user1Id,user2Id);
+        log.info("{} и {} больше не друзья", user1Id, user2Id);
     }
 
     /**
@@ -89,14 +79,13 @@ public class UserService {
      * @param userId идентификатор пользователя, чьих друзей необходимо передать
      * @return List<User> список друзей
      */
-    public List<User> getFriends(int userId) {
+    public HashSet<User> getFriends(int userId) {
 
         HashSet<Integer> friendIdList;
-        List<User> friendList = new ArrayList<>();
-        HashMap<Integer, User> userList = userStorage.getAllUsers();
+        HashSet<User> friendList = new HashSet<>();
         friendIdList = userStorage.getUserById(userId).getFriendIdList();
         for (int id : friendIdList) {
-            friendList.add(userList.get(id));
+            friendList.add(userStorage.getUserById(id));
         }
         log.info("Передан список друзей пользователя id = {}", userId);
         return friendList;

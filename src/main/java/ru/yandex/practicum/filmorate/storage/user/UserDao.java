@@ -4,7 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.constants.Constants;
+import ru.yandex.practicum.filmorate.constants.FriendShipStatusConstants;
+import ru.yandex.practicum.filmorate.constants.FriendsListConstants;
 import ru.yandex.practicum.filmorate.constants.UserTableConstants;
 import ru.yandex.practicum.filmorate.customExceptions.InstanceAlreadyExistException;
 import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
@@ -14,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 
 @Component("userDao")
 @Slf4j
@@ -33,9 +33,18 @@ public class UserDao implements UserDbStorage {
      */
     @Override
     public HashMap<Integer, User> getAllUsers() {
-        /*log.info("Запрошен список всех пользователей");
-        return users;*/
-        return new HashMap<>();
+
+        HashMap<Integer, User> users = new HashMap<>();
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(
+                "SELECT " + UserTableConstants.USER_ID + " AS user_id\n"
+                        + "FROM " + UserTableConstants.TABLE_NAME);
+
+        while (userRows.next()) {
+            int index = userRows.getInt("user_id");
+            users.put(index, loadUserFromDbById(index));
+        }
+        log.info("Переданы все пользователи");
+        return users;
     }
 
     /**
@@ -46,17 +55,31 @@ public class UserDao implements UserDbStorage {
      */
     @Override
     public User addUser(User user) {
-        /*checkUserValidation(user);
-        if (users.containsValue(user)) {
+        checkUserValidation(user);
+        if (isPresentInDataBase(user)) {
             throw new InstanceAlreadyExistException("Не удалось добавить пользователя: пользователь уже существует");
         }
-        user.setId(userCount);
-        user.setFriendIdList(new HashSet<>());
-        users.put(userCount, user);
-        userCount++;
+        jdbcTemplate.update(
+                "INSERT INTO " + UserTableConstants.TABLE_NAME
+                        + " (" + UserTableConstants.EMAIL
+                        + "," + UserTableConstants.LOGIN
+                        + "," + UserTableConstants.NAME
+                        + "," + UserTableConstants.BIRTHDAY + ")"
+                        + " VALUES(?,?,?,?)",
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                Date.valueOf(user.getBirthday()));
+        SqlRowSet usersRows = jdbcTemplate.queryForRowSet(
+                "SELECT " + UserTableConstants.USER_ID + "\n"
+                        + "FROM " + UserTableConstants.TABLE_NAME + "\n"
+                        + "WHERE " + UserTableConstants.LOGIN + "=? AND " + UserTableConstants.EMAIL + "=?"
+                , user.getLogin(), user.getEmail());
         log.info("Добавлен пользователь {}", user);
-        return user;*/
-        return new User();
+        if (usersRows.next()) {
+            user = loadUserFromDbById(usersRows.getInt(UserTableConstants.USER_ID));
+        }
+        return user;
     }
 
     /**
@@ -68,16 +91,27 @@ public class UserDao implements UserDbStorage {
     @Override
     public User updateUser(User user) {
 
-      /*  checkUserValidation(user);
-        if (users.containsKey(user.getId())) {
-            user.setFriendIdList(users.get(user.getId()).getFriendIdList());
-            users.replace(user.getId(), user);
+        if (isPresentInDataBase(user.getId())) {
+            jdbcTemplate.update(
+                    "UPDATE " + UserTableConstants.TABLE_NAME
+                            + " SET "
+                            + UserTableConstants.EMAIL + "= ?,"
+                            + UserTableConstants.LOGIN + "= ?,"
+                            + UserTableConstants.NAME + "= ?,"
+                            + UserTableConstants.BIRTHDAY + "= ?"
+                            + "\nWHERE " + UserTableConstants.USER_ID + "=?;"
+                    ,
+                    user.getEmail(),
+                    user.getLogin(),
+                    user.getName(),
+                    Date.valueOf(user.getBirthday()),
+                    user.getId());
+            user = loadUserFromDbById(user.getId());
             log.info("Обновлен пользователь {}", user);
             return user;
         }
         throw new DataNotFoundException("Не удалось обновить пользователя: пользователь не найден.");
-*/
-        return new User();
+
     }
 
     /**
@@ -88,14 +122,15 @@ public class UserDao implements UserDbStorage {
      */
     @Override
     public User deleteUser(int id) {
-     /*   if (!users.containsKey(id)) {
+        if (!isPresentInDataBase(id)) {
             throw new DataNotFoundException("Не удалось удалить пользователя: пользователь не найден.");
         }
-        User removingUser = users.get(id);
-        users.remove(id);
+        User removingUser = loadUserFromDbById(id);
+        jdbcTemplate.execute(
+                "DELETE FROM " + UserTableConstants.TABLE_NAME
+                        + " WHERE " + UserTableConstants.USER_ID + "= " + id);
         log.info("Удален пользователь {}", removingUser);
-        return removingUser;*/
-        return new User();
+        return removingUser;
     }
 
     /**
@@ -103,9 +138,66 @@ public class UserDao implements UserDbStorage {
      */
     @Override
     public void deleteAllUsers() {
-    //    userCount = 1;
-    //    users.clear();
+        SqlRowSet idsRows = jdbcTemplate.queryForRowSet("SELECT * FROM " + UserTableConstants.TABLE_NAME);
+        while (idsRows.next()) {
+            jdbcTemplate.execute(
+                    "DELETE FROM " + UserTableConstants.TABLE_NAME
+                            + " WHERE " + UserTableConstants.USER_ID + "= " + idsRows.getInt(UserTableConstants.USER_ID));
+        }
+
         log.info("Список пользователей очищен");
+    }
+
+    @Override
+    public void makeFriends(int userId, int friendId) {
+
+        if (areTheyFriends(userId, friendId)) {
+            throw new InstanceAlreadyExistException("Они уже друзья");
+        }
+
+        insertIntoFriendList(userId, friendId, User.FriendStatus.ACCEPTED);
+        insertIntoFriendList(friendId, userId, User.FriendStatus.ACCEPTED);
+        log.info("Пользователь {} и {} записаны в базу друзей", userId, friendId);
+    }
+
+    @Override
+    public void deleteFriends(int userId, int friendId) {
+
+        if (!areTheyFriends(userId, friendId)) {
+            throw new DataNotFoundException("Пользователи " + userId + " и " + friendId + " не дружили");
+        }
+        deleteFromFriendList(userId,friendId);
+
+    }
+
+    private void deleteFromFriendList(int userId, int friendId) {
+        jdbcTemplate.execute(
+                "DELETE FROM " + FriendsListConstants.TABLE_NAME
+                        + " WHERE " + FriendsListConstants.USER_ID + " IN (" + userId + "," + friendId
+                        + ") AND " + FriendsListConstants.FRIEND_ID + " IN (" + userId + "," + friendId + ");");
+    }
+
+    private void insertIntoFriendList(int userId, int friendId, User.FriendStatus status) {
+        jdbcTemplate.update(
+                "INSERT INTO " + FriendsListConstants.TABLE_NAME
+                        + " (" + FriendsListConstants.USER_ID
+                        + "," + FriendsListConstants.FRIEND_ID
+                        + "," + FriendsListConstants.FRIENDSHIP_STATUS_ID + ")\n"
+                        + "VALUES (?,?,?);",
+                userId, friendId, status.ordinal() + 1);
+    }
+
+    private boolean areTheyFriends(int userId, int friendId) {
+        SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
+                "SELECT " + FriendsListConstants.USER_ID
+                        + "\nFROM " + FriendsListConstants.TABLE_NAME
+                        + "\nWHERE " + FriendsListConstants.USER_ID + " IN (?,?) AND "
+                        + FriendsListConstants.FRIEND_ID + " IN (?,?);",
+                userId, friendId, userId, friendId);
+        if (friendsRows.next()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -118,24 +210,72 @@ public class UserDao implements UserDbStorage {
     @Override
     public User getUserById(int id) {
 
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?",id);
+        User user = loadUserFromDbById(id);
+        log.info("Передан пользователь id = {}", id);
+        return user;
+    }
+
+    /**
+     * Создает объект User по данным из БД по первичному ключу
+     *
+     * @param id первичный ключ таблицы
+     * @return объект User
+     */
+    private User loadUserFromDbById(int id) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM "
+                + UserTableConstants.TABLE_NAME + " WHERE " + UserTableConstants.USER_ID + " = ?", id);
         User user = new User();
-        if(userRows.next()){
+        if (userRows.next()) {
             user.setId(id);
             user.setLogin(userRows.getString(UserTableConstants.LOGIN));
             user.setEmail((userRows.getString(UserTableConstants.EMAIL)));
             user.setName(userRows.getString(UserTableConstants.NAME));
             user.setBirthday(Date.valueOf(userRows.getString(UserTableConstants.BIRTHDAY)).toLocalDate());
             checkUserValidation(user);
-        }else {
+        } else {
             throw new DataNotFoundException("Пользователь с id " + id + " не найден.");
         }
+        SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
+                "SELECT " + "fl." + FriendsListConstants.FRIEND_ID + ",\n"
+                        + "fs." + FriendShipStatusConstants.FRIENDSHIP_STATUS_NAME + "\n"
+                        + "FROM " + FriendsListConstants.TABLE_NAME + " AS fl\n"
+                        + "INNER JOIN " + FriendShipStatusConstants.TABLE_NAME + " AS fs ON "
+                        + "fs." + FriendShipStatusConstants.FRIENDSHIP_STATUS_ID
+                        + " = fl." + FriendsListConstants.FRIENDSHIP_STATUS_ID + "\n"
+                        + "WHERE " + FriendsListConstants.USER_ID + " = ?", id);
 
-
-
-
-        log.info("Передан пользователь id = {}", id);
+        while (friendsRows.next()) {
+            int friendID = friendsRows.getInt(FriendsListConstants.FRIEND_ID);
+            User.FriendStatus status = User.FriendStatus.valueOf(
+                    friendsRows.getString(FriendShipStatusConstants.FRIENDSHIP_STATUS_NAME));
+            user.getFriendIdList().add(friendID);
+            user.getFriendStatuses().put(friendID, status);
+        }
         return user;
+    }
+
+    private boolean isPresentInDataBase(User user) {
+        SqlRowSet usersRows = jdbcTemplate.queryForRowSet(
+                "SELECT " + UserTableConstants.USER_ID + "\n"
+                        + "FROM " + UserTableConstants.TABLE_NAME + "\n"
+                        + "WHERE " + UserTableConstants.LOGIN + "=? OR " + UserTableConstants.EMAIL + "=?;"
+                , user.getLogin(), user.getEmail());
+        if (usersRows.next()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isPresentInDataBase(int userId) {
+        SqlRowSet usersRows = jdbcTemplate.queryForRowSet(
+                "SELECT " + UserTableConstants.USER_ID + "\n"
+                        + "FROM " + UserTableConstants.TABLE_NAME + "\n"
+                        + "WHERE " + UserTableConstants.USER_ID + " =?;"
+                , userId);
+        if (usersRows.next()) {
+            return true;
+        }
+        return false;
     }
 
     /**

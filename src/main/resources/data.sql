@@ -1,8 +1,31 @@
-INSERT INTO public.users (email,login,name,birthday)
-VALUES ('mail1@.dd','login1','name',DATE '2000-10-10');
+MERGE INTO public.users (user_id,email,login,name,birthday)
+VALUES (1,'mail1@.dd','login1','name',DATE '2000-10-10');
 
-INSERT INTO public.users (email,login,name,birthday)
-VALUES ('mail2@.dd','login2','name',DATE '2000-10-10');
+MERGE INTO public.users (user_id,email,login,name,birthday)
+VALUES (2,'mail2@.dd','login2','name',DATE '2000-10-10');
 
-INSERT INTO public.users (email,login,name,birthday)
-VALUES ('mail3@.dd','login3','name',DATE '2000-10-10');
+MERGE INTO public.users (user_id,email,login,name,birthday)
+VALUES (3,'mail3@.dd','login3','name',DATE '2000-10-10');
+
+MERGE INTO public.users (user_id,email,login,name,birthday)
+VALUES (4,'mail4@.dd','login4','name',DATE '2000-10-10');
+
+MERGE INTO FRIENDSHIP_STATUS  (FRIENDSHIP_STATUS_ID,FRIENDSHIP_STATUS_NAME)
+VALUES (1,'NOT_ACCEPTED');
+MERGE INTO FRIENDSHIP_STATUS  (FRIENDSHIP_STATUS_ID,FRIENDSHIP_STATUS_NAME)
+VALUES (2,'ACCEPTED');
+
+TRUNCATE TABLE FRIENDS_LIST;
+
+INSERT INTO FRIENDS_LIST (USER_ID,FRIEND_ID,FRIENDSHIP_STATUS_ID)
+VALUES (2,1,2);
+INSERT INTO FRIENDS_LIST (USER_ID,FRIEND_ID,FRIENDSHIP_STATUS_ID)
+VALUES (1,2,2);
+INSERT INTO FRIENDS_LIST (USER_ID,FRIEND_ID,FRIENDSHIP_STATUS_ID)
+VALUES (1,3,2);
+INSERT INTO FRIENDS_LIST (USER_ID,FRIEND_ID,FRIENDSHIP_STATUS_ID)
+VALUES (3,1,2);
+INSERT INTO FRIENDS_LIST (USER_ID,FRIEND_ID,FRIENDSHIP_STATUS_ID)
+VALUES (2,3,1);
+INSERT INTO FRIENDS_LIST (USER_ID,FRIEND_ID,FRIENDSHIP_STATUS_ID)
+VALUES (3,2,1);

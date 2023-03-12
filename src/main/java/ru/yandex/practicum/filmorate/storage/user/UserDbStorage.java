@@ -17,4 +17,8 @@ public interface UserDbStorage {
     public User deleteUser(int id);
 
     public void deleteAllUsers();
+
+    public void makeFriends(int userId, int friendId);
+
+    public void deleteFriends(int userId, int friendId);
 }
