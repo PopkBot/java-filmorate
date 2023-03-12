@@ -25,12 +25,13 @@ public class Film {
     private int duration;
     @Setter
     @EqualsAndHashCode.Exclude
-    private HashSet<Integer> likedUsersId;
+    private HashSet<Integer> likedUsersId = new HashSet<>();
     @Setter
+    @EqualsAndHashCode.Exclude
     private
-    Set<Genre> genreSet=new HashSet<>();
+    Set<Genre> genreSet = new HashSet<>();
     @Setter
-    private RatingMPA ratingMPASet;
+    private RatingMPA ratingMPA;
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration, HashSet<Integer> likedUsersId) {
         this.id = id;
@@ -41,7 +42,17 @@ public class Film {
         this.likedUsersId = likedUsersId;
     }
 
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, RatingMPA ratingMPA) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.ratingMPA = ratingMPA;
+    }
 
+    public Film() {
+    }
 
     public enum Genre{
         Comedy,
