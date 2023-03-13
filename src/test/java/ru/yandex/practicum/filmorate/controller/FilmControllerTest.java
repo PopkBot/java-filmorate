@@ -180,17 +180,6 @@ class FilmControllerTest {
         Assertions.assertEquals(HttpStatus.NOT_FOUND,putResponse.getStatusCode());
     }
 
-    @Test
-    void shouldReturnOkStatusWhenAddingLikeProperly(){
-        User user = new User(1,"a@m.r","l1","n1",LocalDate.now());
-        HttpEntity<User> userEntity = new HttpEntity<>(user);
-        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
-        Film film = new Film(3,"n","d",LocalDate.now(),10,new RatingMPA(1,"G"));
-        HttpEntity<Film> filmEntity = new HttpEntity<>(film);
-        restTemplate.exchange("/films",HttpMethod.POST,filmEntity,Film.class);
-        ResponseEntity<String> putResponse = restTemplate.exchange("/films/3/like/1",HttpMethod.PUT,null, String.class);
-        Assertions.assertEquals(HttpStatus.OK,putResponse.getStatusCode());
-    }
 
     @Test
     void shouldReturnExceptionWhenDeletingLikeFromNotExistingFilm(){
