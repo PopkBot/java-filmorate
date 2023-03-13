@@ -145,18 +145,23 @@ public class UserDao implements UserDbStorage {
                             + " WHERE " + UserTableConstants.USER_ID + "= " + idsRows.getInt(UserTableConstants.USER_ID));
         }
 
-        log.info("Список пользователей очищен");
+        log.info("Таблица пользователей очищена");
     }
 
     @Override
     public void makeFriends(int userId, int friendId) {
 
+        if(!isPresentInDataBase(userId) || !isPresentInDataBase(friendId)){
+            throw new DataNotFoundException("Не удалось удалить пользователя: пользователь не найден.");
+        }
+
         if (areTheyFriends(userId, friendId)) {
             throw new InstanceAlreadyExistException("Они уже друзья");
         }
 
+
         insertIntoFriendList(userId, friendId, User.FriendStatus.ACCEPTED);
-        insertIntoFriendList(friendId, userId, User.FriendStatus.ACCEPTED);
+        //insertIntoFriendList(friendId, userId, User.FriendStatus.ACCEPTED);
         log.info("Пользователь {} и {} записаны в базу друзей", userId, friendId);
     }
 
@@ -254,7 +259,7 @@ public class UserDao implements UserDbStorage {
         return user;
     }
 
-    private boolean isPresentInDataBase(User user) {
+    public boolean isPresentInDataBase(User user) {
         SqlRowSet usersRows = jdbcTemplate.queryForRowSet(
                 "SELECT " + UserTableConstants.USER_ID + "\n"
                         + "FROM " + UserTableConstants.TABLE_NAME + "\n"
@@ -266,7 +271,7 @@ public class UserDao implements UserDbStorage {
         return false;
     }
 
-    private boolean isPresentInDataBase(int userId) {
+    public boolean isPresentInDataBase(int userId) {
         SqlRowSet usersRows = jdbcTemplate.queryForRowSet(
                 "SELECT " + UserTableConstants.USER_ID + "\n"
                         + "FROM " + UserTableConstants.TABLE_NAME + "\n"

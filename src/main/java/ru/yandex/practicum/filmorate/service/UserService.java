@@ -79,14 +79,15 @@ public class UserService {
      * @param userId идентификатор пользователя, чьих друзей необходимо передать
      * @return List<User> список друзей
      */
-    public HashSet<User> getFriends(int userId) {
+    public List<User> getFriends(int userId) {
 
         HashSet<Integer> friendIdList;
-        HashSet<User> friendList = new HashSet<>();
+        List<User> friendList = new ArrayList<>();
         friendIdList = userStorage.getUserById(userId).getFriendIdList();
         for (int id : friendIdList) {
             friendList.add(userStorage.getUserById(id));
         }
+        Collections.sort(friendList,(f1,f2)->f1.getId()-f2.getId());
         log.info("Передан список друзей пользователя id = {}", userId);
         return friendList;
     }

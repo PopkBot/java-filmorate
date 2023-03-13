@@ -71,7 +71,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/friends")
-    public HashSet<User> getUserFriends(@PathVariable int id){
+    public List<User> getUserFriends(@PathVariable int id){
         log.info("Запрос: передать всех друзей пользователя {}",id);
         return userService.getFriends(id);
     }

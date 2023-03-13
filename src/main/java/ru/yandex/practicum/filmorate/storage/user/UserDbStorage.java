@@ -21,4 +21,8 @@ public interface UserDbStorage {
     public void makeFriends(int userId, int friendId);
 
     public void deleteFriends(int userId, int friendId);
+
+    public boolean isPresentInDataBase(User user);
+
+    public boolean isPresentInDataBase(int userId);
 }

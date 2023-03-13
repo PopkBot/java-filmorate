@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -59,11 +60,16 @@ public class FilmService {
      */
     public void addLike(int filmId, int userId) {
 
-        Film film;
-        film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        film.getLikedUsersId().add(userId);
-        log.info("Добавлен лайк к фильму {} от пользователя с id {}", film, userId);
+        if(!filmStorage.isPresentInDataBase(filmId)){
+            throw new DataNotFoundException("Фильм с id " + filmId + " не найден.");
+        }
+        if(!userStorage.isPresentInDataBase(userId)){
+            throw new DataNotFoundException("Пользователь с id " + userId + " не найден.");
+        }
+
+        filmStorage.addLike(filmId,userId);
+
+        log.info("Добавлен лайк к фильму {} от пользователя с id {}", filmId, userId);
 
     }
 
@@ -75,11 +81,14 @@ public class FilmService {
      */
     public void deleteLike(int filmId, int userId) {
 
-        Film film;
-        film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        film.getLikedUsersId().remove(userId);
-        log.info("Удален лайк к фильму {} от пользователя с id {}", film, userId);
+        if(!filmStorage.isPresentInDataBase(filmId)){
+            throw new DataNotFoundException("Фильм с id " + filmId + " не найден.");
+        }
+        if(!userStorage.isPresentInDataBase(userId)){
+            throw new DataNotFoundException("Пользователь с id " + userId + " не найден.");
+        }
+        filmStorage.deleteLike(filmId,userId);
+        log.info("Удален лайк к фильму {} от пользователя с id {}", filmId, userId);
     }
 
     /**
