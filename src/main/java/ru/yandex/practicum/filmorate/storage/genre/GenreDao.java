@@ -4,10 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.constants.GenreTableConstants;
-import ru.yandex.practicum.filmorate.constants.RatingMpaTableConstants;
 import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.RatingMPA;
 
 import java.util.ArrayList;
 import java.util.List;

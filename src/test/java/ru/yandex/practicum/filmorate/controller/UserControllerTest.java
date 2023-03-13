@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -26,6 +25,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class UserControllerTest {
@@ -42,9 +44,14 @@ class UserControllerTest {
     }
     @BeforeEach
     void beforeEach(){
+        restTemplate.delete("/films");
         restTemplate.delete("/users");
     }
-
+    @AfterEach
+    void afterEach(){
+        restTemplate.delete("/films");
+        restTemplate.delete("/users");
+    }
     @Test
     void shouldReturnEmptyList(){
         ResponseEntity<List> response = restTemplate.getForEntity("/users", List.class);
@@ -81,8 +88,8 @@ class UserControllerTest {
 
     @Test
     void shouldUpdateUser(){
-        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1),new HashSet<>());
-        User user2 = new User(1,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1),new HashSet<>());
+        User user1 = new User(1,"u1@m.ru","l1","n1",LocalDate.of(2000,1,1));
+        User user2 = new User(1,"u2@m.ru","l2","n2",LocalDate.of(2002,1,1));
         ResponseEntity<User> postResponse = restTemplate.postForEntity("/users",user1, User.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -184,8 +191,8 @@ class UserControllerTest {
 
     @Test
     void shouldAddFriend(){
-        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
-        User user2 = new User(2, "u2@m.ru", "l2", " ", LocalDate.of(2000, 1, 1),new HashSet<>());
+        User user1 = new User(1, "u1@m.ru", "l1", " ", LocalDate.of(2000, 1, 1));
+        User user2 = new User(2, "u2@m.ru", "l2", " ", LocalDate.of(2000, 1, 1));
 
         HttpEntity<User> userEntity = new HttpEntity<>(user1);
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);

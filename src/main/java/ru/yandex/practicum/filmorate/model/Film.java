@@ -5,8 +5,9 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -27,7 +28,7 @@ public class Film {
     private HashSet<Integer> likedUsersId = new HashSet<>();
     @EqualsAndHashCode.Exclude
     private
-    Set<Genre> genres = new HashSet<>();
+    List<Genre> genres = new ArrayList<>();
     @EqualsAndHashCode.Exclude
     private RatingMPA mpa;
 
@@ -46,6 +47,18 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.mpa = mpa;
+    }
+
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, HashSet<Integer> likedUsersId,  RatingMPA mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.likedUsersId = likedUsersId;
+
+        this.mpa = mpa;
     }
 
     public Film() {

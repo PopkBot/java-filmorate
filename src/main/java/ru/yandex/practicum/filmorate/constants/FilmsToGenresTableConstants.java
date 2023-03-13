@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.constants;
 
-public class FilmsToGenresTableConstanst {
+public class FilmsToGenresTableConstants {
 
     public final static String TABLE_NAME = "FILMS_TO_GENRES";
     public final static String FILM_ID = "FILM_ID";

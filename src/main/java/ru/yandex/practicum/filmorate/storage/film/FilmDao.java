@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.RatingMPA;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 
 @Component("FilmDao")
@@ -68,7 +69,7 @@ public class FilmDao implements FilmStorage {
         extractFilmCoreFromDB(id, film);
         extractFilmGenresFromDB(id, film);
         extractFilmLikesFromDB(id, film);
-        extractFilmMpaFromDB(id,film);
+        extractFilmMpaFromDB(id, film);
         checkFilmValidation(film);
         System.out.println(film);
         return film;
@@ -92,17 +93,18 @@ public class FilmDao implements FilmStorage {
 
     private void extractFilmGenresFromDB(int id, Film film) {
         SqlRowSet genresRow = jdbcTemplate.queryForRowSet(
-                "SELECT ge." + GenreTableConstants.GENRE_ID+" ,ge."+GenreTableConstants.GENRE_NAME
-                        + "\nFROM " + FilmsToGenresTableConstanst.TABLE_NAME + " AS ftg\n"
+                "SELECT ge." + GenreTableConstants.GENRE_ID + " ,ge." + GenreTableConstants.GENRE_NAME
+                        + "\nFROM " + FilmsToGenresTableConstants.TABLE_NAME + " AS ftg\n"
                         + "INNER JOIN " + GenreTableConstants.TABLE_NAME + " AS ge ON "
-                        + "ge." + GenreTableConstants.GENRE_ID + "= ftg." + FilmsToGenresTableConstanst.GENRE_ID
-                        + "\nWHERE ftg." + FilmsToGenresTableConstanst.FILM_ID + "= ?", id
+                        + "ge." + GenreTableConstants.GENRE_ID + "= ftg." + FilmsToGenresTableConstants.GENRE_ID
+                        + "\nWHERE ftg." + FilmsToGenresTableConstants.FILM_ID + "= ?", id
         );
 
         while (genresRow.next()) {
             film.getGenres().add(new Genre(genresRow.getInt(GenreTableConstants.GENRE_ID)
-                    ,genresRow.getString(GenreTableConstants.GENRE_NAME)));
+                    , genresRow.getString(GenreTableConstants.GENRE_NAME)));
         }
+        Collections.sort(film.getGenres(),(g1,g2)->g1.getId()-g2.getId());
     }
 
     private void extractFilmLikesFromDB(int id, Film film) {
@@ -118,10 +120,10 @@ public class FilmDao implements FilmStorage {
 
     private void extractFilmMpaFromDB(int id, Film film) {
         SqlRowSet mpaRow = jdbcTemplate.queryForRowSet(
-                "SELECT f." + FilmTableConstants.RATING_MPA_ID+", mpa."+RatingMpaTableConstants.RATING_MPA_NAME
+                "SELECT f." + FilmTableConstants.RATING_MPA_ID + ", mpa." + RatingMpaTableConstants.RATING_MPA_NAME
                         + "\nFROM " + FilmTableConstants.TABLE_NAME + " AS f\n"
-                        +"INNER JOIN "+RatingMpaTableConstants.TABLE_NAME+" AS mpa "
-                        +"ON mpa."+RatingMpaTableConstants.RATING_MPA_ID+" = f."+FilmTableConstants.RATING_MPA_ID
+                        + "INNER JOIN " + RatingMpaTableConstants.TABLE_NAME + " AS mpa "
+                        + "ON mpa." + RatingMpaTableConstants.RATING_MPA_ID + " = f." + FilmTableConstants.RATING_MPA_ID
                         + "\nWHERE " + FilmTableConstants.FILM_ID + "= ?", id
         );
         if (mpaRow.next()) {
@@ -243,19 +245,28 @@ public class FilmDao implements FilmStorage {
                     film.getId());
 
             jdbcTemplate.execute(
-                    "DELETE FROM "+FilmsToGenresTableConstanst.TABLE_NAME
-                            +" WHERE "+FilmsToGenresTableConstanst.FILM_ID+"= "+film.getId()
+                    "DELETE FROM " + FilmsToGenresTableConstants.TABLE_NAME
+                            + " WHERE " + FilmsToGenresTableConstants.FILM_ID + "= " + film.getId()
             );
 
             for (Genre genre : film.getGenres()) {
 
-                jdbcTemplate.update(
-                        "INSERT INTO " + FilmsToGenresTableConstanst.TABLE_NAME
-                                + "("+FilmsToGenresTableConstanst.GENRE_ID
-                                +","+FilmsToGenresTableConstanst.FILM_ID
-                        +") VALUES (?,?);",
+                SqlRowSet genresRows = jdbcTemplate.queryForRowSet(
+                        "SELECT * FROM " + FilmsToGenresTableConstants.TABLE_NAME
+                                + " WHERE " + FilmsToGenresTableConstants.GENRE_ID + " = ? AND "
+                                + FilmsToGenresTableConstants.FILM_ID + "= ?",
                         genre.getId(), film.getId()
                 );
+                if (!genresRows.next()) {
+
+                    jdbcTemplate.update(
+                            "INSERT INTO " + FilmsToGenresTableConstants.TABLE_NAME
+                                    + "(" + FilmsToGenresTableConstants.GENRE_ID
+                                    + "," + FilmsToGenresTableConstants.FILM_ID
+                                    + ") VALUES (?,?);",
+                            genre.getId(), film.getId()
+                    );
+                }
             }
 
             film = loadFilmFromDbById(film.getId());
@@ -305,11 +316,11 @@ public class FilmDao implements FilmStorage {
     public void addLike(int filmId, int userId) {
 
         SqlRowSet likeRow = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM "+LikedFilmsTableConstants.TABLE_NAME
-                +" WHERE "+LikedFilmsTableConstants.FILM_ID+" = "+filmId
-                +" AND "+LikedFilmsTableConstants.USER_ID+" = "+userId
+                "SELECT * FROM " + LikedFilmsTableConstants.TABLE_NAME
+                        + " WHERE " + LikedFilmsTableConstants.FILM_ID + " = " + filmId
+                        + " AND " + LikedFilmsTableConstants.USER_ID + " = " + userId
         );
-        if(likeRow.next()){
+        if (likeRow.next()) {
             throw new InstanceAlreadyExistException("Лайк уже стоит");
         }
 

@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -16,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.RatingMPA;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class FilmControllerTest {
@@ -41,6 +43,12 @@ class FilmControllerTest {
     @BeforeEach
     void beforeEach(){
         restTemplate.delete("/films");
+        restTemplate.delete("/users");
+    }
+    @AfterEach
+    void afterEach(){
+        restTemplate.delete("/films");
+        restTemplate.delete("/users");
     }
 
     @Test
@@ -54,8 +62,8 @@ class FilmControllerTest {
     @Test
     void shouldPostAndReturnValidFilm(){
 
-        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
-        Film film2 = new Film(2,"f2","d2",LocalDate.of(2001,1,1),10,new HashSet<>());
+        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new RatingMPA(1,"G"));
+        Film film2 = new Film(2,"f2","d2",LocalDate.of(2001,1,1),10,new RatingMPA(1,"G"));
 
         ResponseEntity<Film> postResponse = restTemplate.postForEntity("/films",film1, Film.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
@@ -78,8 +86,8 @@ class FilmControllerTest {
 
     @Test
     void shouldUpdateFilm(){
-        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
-        Film film2 = new Film(1,"f2","d2",LocalDate.of(2001,1,1),10,new HashSet<>());
+        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new RatingMPA(1,"G"));
+        Film film2 = new Film(1,"f2","d2",LocalDate.of(2001,1,1),10,new RatingMPA(1,"G"));
         ResponseEntity<Film> postResponse = restTemplate.postForEntity("/films",film1, Film.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -94,7 +102,7 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnInstanceAlreadyExistException(){
-        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new HashSet<>());
+        Film film1 = new Film(1,"f1","d1",LocalDate.of(2000,1,1),10,new RatingMPA(1,"G"));
         ResponseEntity<Film> postResponse = restTemplate.postForEntity("/films",film1, Film.class);
         System.out.println("Тело ответа: "+postResponse.getBody().toString());
         Assertions.assertEquals(HttpStatus.OK,postResponse.getStatusCode());
@@ -174,13 +182,13 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnOkStatusWhenAddingLikeProperly(){
-        User user = new User(1,"a@m.r","l1","n1",LocalDate.now(),new HashSet<>());
+        User user = new User(1,"a@m.r","l1","n1",LocalDate.now());
         HttpEntity<User> userEntity = new HttpEntity<>(user);
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
-        Film film = new Film(1,"n","d",LocalDate.now(),10,new HashSet<>());
+        Film film = new Film(3,"n","d",LocalDate.now(),10,new RatingMPA(1,"G"));
         HttpEntity<Film> filmEntity = new HttpEntity<>(film);
         restTemplate.exchange("/films",HttpMethod.POST,filmEntity,Film.class);
-        ResponseEntity<String> putResponse = restTemplate.exchange("/films/1/like/1",HttpMethod.PUT,null, String.class);
+        ResponseEntity<String> putResponse = restTemplate.exchange("/films/3/like/1",HttpMethod.PUT,null, String.class);
         Assertions.assertEquals(HttpStatus.OK,putResponse.getStatusCode());
     }
 
@@ -200,10 +208,10 @@ class FilmControllerTest {
     @Test
     void shouldReturnExceptionWhenDeletingLikeOfNotExistingUser(){
         String expectedResponse = "{\"message\":\"Пользователь с id 1111 не найден.\"}";
-        Film film = new Film(1,"n","d",LocalDate.now(),10,new HashSet<>());
+        Film film = new Film(2,"n1","d1",LocalDate.now(),10,new RatingMPA(1,"G"));
         HttpEntity<Film> entity = new HttpEntity<>(film);
         restTemplate.exchange("/films",HttpMethod.POST,entity,Film.class);
-        ResponseEntity<String> putResponse = restTemplate.exchange("/films/1/like/1111",HttpMethod.PUT,null, String.class);
+        ResponseEntity<String> putResponse = restTemplate.exchange("/films/2/like/1111",HttpMethod.PUT,null, String.class);
         System.out.println(putResponse.getBody());
         Assertions.assertEquals(HttpStatus.NOT_FOUND,putResponse.getStatusCode());
         Assertions.assertEquals(expectedResponse,putResponse.getBody());
@@ -211,10 +219,10 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnOKStatusWhenDeletingLikeProperly(){
-        User user = new User(1,"a@m.r","l1","n1",LocalDate.now(),new HashSet<>());
+        User user = new User(1,"a@m.r","l1","n1",LocalDate.now());
         HttpEntity<User> userEntity = new HttpEntity<>(user);
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
-        Film film = new Film(1,"n","d",LocalDate.now(),10,new HashSet<>());
+        Film film = new Film(1,"n","d",LocalDate.now(),10,new RatingMPA(1,"G"));
         HttpEntity<Film> filmEntity = new HttpEntity<>(film);
         restTemplate.exchange("/films",HttpMethod.POST,filmEntity,Film.class);
         restTemplate.exchange("/films/1/like/1",HttpMethod.PUT,null, String.class);
@@ -224,17 +232,17 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnListOfMostPopularFilms(){
-        User user1 = new User(1,"a1@m.r","l1","n1",LocalDate.now(),new HashSet<>());
-        User user2 = new User(2,"a2@m.r","l2","n2",LocalDate.now(),new HashSet<>());
+        User user1 = new User(1,"a1@m.r","l1","n1",LocalDate.now());
+        User user2 = new User(2,"a2@m.r","l2","n2",LocalDate.now());
         HttpEntity<User> userEntity;
         userEntity = new HttpEntity<>(user1);
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
         userEntity = new HttpEntity<>(user2);
         restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
 
-        Film film1 = new Film(1,"n1","d1",LocalDate.now(),10,new HashSet<>(Set.of(1,2)));
-        Film film2 = new Film(2,"n2","d2",LocalDate.now(),10,new HashSet<>(Set.of(2)));
-        Film film3 = new Film(3,"n3","d3",LocalDate.now(),10,new HashSet<>());
+        Film film1 = new Film(1,"n1","d1",LocalDate.now(),10,new HashSet<>(Set.of(1,2)),new RatingMPA(1,"G"));
+        Film film2 = new Film(2,"n2","d2",LocalDate.now(),10,new HashSet<>(Set.of(2)),new RatingMPA(1,"G"));
+        Film film3 = new Film(3,"n3","d3",LocalDate.now(),10,new HashSet<>(),new RatingMPA(1,"G"));
         HttpEntity<Film> filmEntity;
         filmEntity = new HttpEntity<>(film1);
         restTemplate.exchange("/films",HttpMethod.POST,filmEntity,Film.class);
