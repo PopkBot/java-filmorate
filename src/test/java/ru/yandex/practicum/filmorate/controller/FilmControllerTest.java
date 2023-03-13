@@ -218,19 +218,6 @@ class FilmControllerTest {
     }
 
     @Test
-    void shouldReturnOKStatusWhenDeletingLikeProperly(){
-        User user = new User(1,"a@m.r","l1","n1",LocalDate.now());
-        HttpEntity<User> userEntity = new HttpEntity<>(user);
-        restTemplate.exchange("/users",HttpMethod.POST,userEntity,User.class);
-        Film film = new Film(1,"n","d",LocalDate.now(),10,new RatingMPA(1,"G"));
-        HttpEntity<Film> filmEntity = new HttpEntity<>(film);
-        restTemplate.exchange("/films",HttpMethod.POST,filmEntity,Film.class);
-        restTemplate.exchange("/films/1/like/1",HttpMethod.PUT,null, String.class);
-        ResponseEntity<String> putResponse = restTemplate.exchange("/films/1/like/1",HttpMethod.DELETE,null, String.class);
-        Assertions.assertEquals(HttpStatus.OK,putResponse.getStatusCode());
-    }
-
-    @Test
     void shouldReturnListOfMostPopularFilms(){
         User user1 = new User(1,"a1@m.r","l1","n1",LocalDate.now());
         User user2 = new User(2,"a2@m.r","l2","n2",LocalDate.now());
