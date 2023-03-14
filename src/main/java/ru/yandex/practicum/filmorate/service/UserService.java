@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.*;
 
-@Service("UserService")
+@Service()
 @Slf4j
 public class UserService {
 

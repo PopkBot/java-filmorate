@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.ArrayList;
 import java.util.List;
-@Component("GenreDao")
+@Component()
 public class GenreDao implements GenreStorage{
 
     private final JdbcTemplate jdbcTemplate;

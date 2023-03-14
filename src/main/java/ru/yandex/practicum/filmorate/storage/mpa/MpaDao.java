@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.model.RatingMPA;
 
 import java.util.ArrayList;
 import java.util.List;
-@Component("MpaDao")
+@Component()
 public class MpaDao implements MpaStorage{
 
     private final JdbcTemplate jdbcTemplate;

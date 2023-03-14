@@ -10,10 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @EqualsAndHashCode
 @ToString
 @Setter
+@Builder
 public class Film {
     @EqualsAndHashCode.Exclude
     private int id;
@@ -25,45 +27,14 @@ public class Film {
     private LocalDate releaseDate;
     private int duration;
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private HashSet<Integer> likedUsersId = new HashSet<>();
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private
     List<Genre> genres = new ArrayList<>();
     @EqualsAndHashCode.Exclude
     private RatingMPA mpa;
-
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, HashSet<Integer> likedUsersId) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.likedUsersId = likedUsersId;
-    }
-
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, RatingMPA mpa) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-    }
-
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, HashSet<Integer> likedUsersId,  RatingMPA mpa) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.likedUsersId = likedUsersId;
-
-        this.mpa = mpa;
-    }
-
-    public Film() {
-    }
-
 
 }
 

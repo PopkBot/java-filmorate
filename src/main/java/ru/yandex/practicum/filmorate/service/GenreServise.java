@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.List;
 
-@Service("GenreServise")
+@Service()
 @Slf4j
 public class GenreServise {
 

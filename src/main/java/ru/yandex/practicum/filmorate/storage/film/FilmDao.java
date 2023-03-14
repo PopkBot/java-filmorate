@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 
-@Component("FilmDao")
+@Component()
 @Slf4j
 public class FilmDao implements FilmStorage {
 
@@ -185,69 +187,25 @@ public class FilmDao implements FilmStorage {
         if (isPresentInDataBase(film)) {
             throw new InstanceAlreadyExistException("Не удалось добавить фильм: фильм уже существует");
         }
-        jdbcTemplate.update(
-                "INSERT INTO " + FilmTableConstants.TABLE_NAME
-                        + " (" + FilmTableConstants.NAME
-                        + "," + FilmTableConstants.DESCRIPTION
-                        + "," + FilmTableConstants.RELEASE_DATE
-                        + "," + FilmTableConstants.DURATION
-                        + "," + FilmTableConstants.RATING_MPA_ID + ")"
-                        + " VALUES(?,?,?,?,?)",
-                film.getName(),
-                film.getDescription(),
-                Date.valueOf(film.getReleaseDate()),
-                film.getDuration(),
-                film.getMpa().getId()
-        );
-        SqlRowSet filmRows = getIdRowsFromDb(film);
-        if (filmRows.next()) {
-            film.setId(filmRows.getInt(FilmTableConstants.FILM_ID));
-        }
-
-        for (Genre genre : film.getGenres()) {
+        try {
             jdbcTemplate.update(
-                    "INSERT INTO FILMS_TO_GENRES (FILM_ID,GENRE_ID)"
-                            + " VALUES(?,?);",
-                    film.getId(), genre.getId()
-            );
-        }
-
-
-        log.info("Добавлен фильм {}", film);
-        return film;
-    }
-
-    /**
-     * Обновляет фильм в таблице
-     *
-     * @param film обновленная версия фильм, содержит идентификатор Id
-     * @return - Film в случае успешного обновления фильм возвращает добавленный объект
-     */
-    @Override
-    public Film updateFilm(Film film) {
-
-        if (isPresentInDataBase(film.getId())) {
-            jdbcTemplate.update(
-                    "UPDATE " + FilmTableConstants.TABLE_NAME
-                            + " SET "
-                            + FilmTableConstants.NAME + "= ?,"
-                            + FilmTableConstants.DESCRIPTION + "= ?,"
-                            + FilmTableConstants.RELEASE_DATE + "= ?,"
-                            + FilmTableConstants.DURATION + "= ?,"
-                            + FilmTableConstants.RATING_MPA_ID + "= ?"
-                            + "\nWHERE " + FilmTableConstants.FILM_ID + "= ? ;"
-                    ,
+                    "INSERT INTO " + FilmTableConstants.TABLE_NAME
+                            + " (" + FilmTableConstants.NAME
+                            + "," + FilmTableConstants.DESCRIPTION
+                            + "," + FilmTableConstants.RELEASE_DATE
+                            + "," + FilmTableConstants.DURATION
+                            + "," + FilmTableConstants.RATING_MPA_ID + ")"
+                            + " VALUES(?,?,?,?,?)",
                     film.getName(),
                     film.getDescription(),
                     Date.valueOf(film.getReleaseDate()),
                     film.getDuration(),
-                    film.getMpa().getId(),
-                    film.getId());
-
-            jdbcTemplate.execute(
-                    "DELETE FROM " + FilmsToGenresTableConstants.TABLE_NAME
-                            + " WHERE " + FilmsToGenresTableConstants.FILM_ID + "= " + film.getId()
+                    film.getMpa().getId()
             );
+            SqlRowSet filmRows = getIdRowsFromDb(film);
+            if (filmRows.next()) {
+                film.setId(filmRows.getInt(FilmTableConstants.FILM_ID));
+            }
 
             for (Genre genre : film.getGenres()) {
 
@@ -270,10 +228,84 @@ public class FilmDao implements FilmStorage {
             }
 
             film = loadFilmFromDbById(film.getId());
-            log.info("Обновлен фильм {}", film);
-            return film;
+
+            log.info("Добавлен фильм {}", film);
+        }catch (DataIntegrityViolationException | BadSqlGrammarException ex){
+            SqlRowSet filmRows = getIdRowsFromDb(film);
+            if (filmRows.next()) {
+                film.setId(filmRows.getInt(FilmTableConstants.FILM_ID));
+            }
+            deleteFilm(film.getId());
+            throw new RuntimeException("SQL exception");
         }
-        throw new DataNotFoundException("Не удалось обновить фильм: фильм не найден.");
+
+        return film;
+    }
+
+    /**
+     * Обновляет фильм в таблице
+     *
+     * @param film обновленная версия фильм, содержит идентификатор Id
+     * @return - Film в случае успешного обновления фильм возвращает добавленный объект
+     */
+    @Override
+    public Film updateFilm(Film film) {
+        Film buffFilm = new Film();
+        try {
+            if (isPresentInDataBase(film.getId())) {
+                buffFilm = loadFilmFromDbById(film.getId());
+                jdbcTemplate.update(
+                        "UPDATE " + FilmTableConstants.TABLE_NAME
+                                + " SET "
+                                + FilmTableConstants.NAME + "= ?,"
+                                + FilmTableConstants.DESCRIPTION + "= ?,"
+                                + FilmTableConstants.RELEASE_DATE + "= ?,"
+                                + FilmTableConstants.DURATION + "= ?,"
+                                + FilmTableConstants.RATING_MPA_ID + "= ?"
+                                + "\nWHERE " + FilmTableConstants.FILM_ID + "= ? ;"
+                        ,
+                        film.getName(),
+                        film.getDescription(),
+                        Date.valueOf(film.getReleaseDate()),
+                        film.getDuration(),
+                        film.getMpa().getId(),
+                        film.getId());
+
+                jdbcTemplate.execute(
+                        "DELETE FROM " + FilmsToGenresTableConstants.TABLE_NAME
+                                + " WHERE " + FilmsToGenresTableConstants.FILM_ID + "= " + film.getId()
+                );
+
+                for (Genre genre : film.getGenres()) {
+
+                    SqlRowSet genresRows = jdbcTemplate.queryForRowSet(
+                            "SELECT * FROM " + FilmsToGenresTableConstants.TABLE_NAME
+                                    + " WHERE " + FilmsToGenresTableConstants.GENRE_ID + " = ? AND "
+                                    + FilmsToGenresTableConstants.FILM_ID + "= ?",
+                            genre.getId(), film.getId()
+                    );
+                    if (!genresRows.next()) {
+
+                        jdbcTemplate.update(
+                                "INSERT INTO " + FilmsToGenresTableConstants.TABLE_NAME
+                                        + "(" + FilmsToGenresTableConstants.GENRE_ID
+                                        + "," + FilmsToGenresTableConstants.FILM_ID
+                                        + ") VALUES (?,?);",
+                                genre.getId(), film.getId()
+                        );
+                    }
+                }
+
+                film = loadFilmFromDbById(film.getId());
+                log.info("Обновлен фильм {}", film);
+                return film;
+
+            }
+            throw new DataNotFoundException("Не удалось обновить фильм: фильм не найден.");
+        }catch (DataIntegrityViolationException | BadSqlGrammarException ex){
+            updateFilm(buffFilm);
+            throw new RuntimeException("SQL exception");
+        }
     }
 
     /**

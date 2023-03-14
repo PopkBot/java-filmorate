@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.List;
 
-@Service("MpaService")
+@Service()
 @Slf4j
 public class MpaService {
 

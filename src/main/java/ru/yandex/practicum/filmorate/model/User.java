@@ -9,7 +9,10 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 
+
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @EqualsAndHashCode
 @ToString
@@ -28,26 +31,13 @@ public class User {
     @NotNull(message = "дата рождения не может быть пустой")
     private LocalDate birthday;
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private HashSet<Integer> friendIdList=new HashSet<>();
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private HashMap<Integer,FriendStatus> friendStatuses=new HashMap<>();
 
-    public User(int id, String email, String login, String name, LocalDate birthday, HashSet<Integer> friendIdList) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-        this.friendIdList = friendIdList;
-    }
 
-    public User(int id, String email, String login, String name, LocalDate birthday) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-    }
 
     public enum FriendStatus{
         NOT_ACCEPTED,
