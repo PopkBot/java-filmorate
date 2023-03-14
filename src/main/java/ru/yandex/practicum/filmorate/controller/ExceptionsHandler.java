@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -10,6 +11,8 @@ import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.ExceptionMessage;
 
+import java.sql.SQLException;
+
 @Slf4j
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -17,29 +20,32 @@ public class ExceptionsHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionMessage handleValidationException(final ValidationException ex){
-        log.info(ex.getMessage());
+        log.warn(ex.getMessage());
         return new ExceptionMessage(ex.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionMessage handleInstanceAlreadyExistException(final InstanceAlreadyExistException ex){
-        log.info(ex.getMessage());
+        log.warn(ex.getMessage());
         return new ExceptionMessage(ex.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionMessage handleInstanceNotFoundException(final DataNotFoundException ex){
-        log.info(ex.getMessage());
+        log.warn(ex.getMessage());
         return new ExceptionMessage(ex.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionMessage errorMessage(final Throwable ex){
-        log.info(ex.getMessage());
+        log.warn(ex.getClass()+" "+ex.getMessage());
         return new ExceptionMessage(ex.getMessage());
     }
+
+
 
 
 

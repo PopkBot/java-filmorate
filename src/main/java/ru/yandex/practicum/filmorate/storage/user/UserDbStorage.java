@@ -4,7 +4,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.HashMap;
 
-public interface UserStorage {
+public interface UserDbStorage {
 
     public User getUserById(int id);
 
@@ -17,4 +17,12 @@ public interface UserStorage {
     public User deleteUser(int id);
 
     public void deleteAllUsers();
+
+    public void makeFriends(int userId, int friendId);
+
+    public void deleteFriends(int userId, int friendId);
+
+    public boolean isPresentInDataBase(User user);
+
+    public boolean isPresentInDataBase(int userId);
 }

@@ -7,22 +7,22 @@ import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Service
+@Service()
 @Slf4j
 public class FilmService {
 
 
-    private final UserStorage userStorage;
+    private final UserDbStorage userStorage;
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(UserStorage userStorage, FilmStorage filmStorage) {
+    public FilmService(UserDbStorage userStorage, FilmStorage filmStorage) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
     }
@@ -59,11 +59,16 @@ public class FilmService {
      */
     public void addLike(int filmId, int userId) {
 
-        Film film;
-        film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        film.getLikedUsersId().add(userId);
-        log.info("Добавлен лайк к фильму {} от пользователя с id {}", film, userId);
+        if(!filmStorage.isPresentInDataBase(filmId)){
+            throw new DataNotFoundException("Фильм с id " + filmId + " не найден.");
+        }
+        if(!userStorage.isPresentInDataBase(userId)){
+            throw new DataNotFoundException("Пользователь с id " + userId + " не найден.");
+        }
+
+        filmStorage.addLike(filmId,userId);
+
+        log.info("Добавлен лайк к фильму {} от пользователя с id {}", filmId, userId);
 
     }
 
@@ -75,11 +80,14 @@ public class FilmService {
      */
     public void deleteLike(int filmId, int userId) {
 
-        Film film;
-        film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        film.getLikedUsersId().remove(userId);
-        log.info("Удален лайк к фильму {} от пользователя с id {}", film, userId);
+        if(!filmStorage.isPresentInDataBase(filmId)){
+            throw new DataNotFoundException("Фильм с id " + filmId + " не найден.");
+        }
+        if(!userStorage.isPresentInDataBase(userId)){
+            throw new DataNotFoundException("Пользователь с id " + userId + " не найден.");
+        }
+        filmStorage.deleteLike(filmId,userId);
+        log.info("Удален лайк к фильму {} от пользователя с id {}", filmId, userId);
     }
 
     /**

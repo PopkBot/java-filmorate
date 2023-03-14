@@ -3,22 +3,20 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.customExceptions.DataNotFoundException;
-import ru.yandex.practicum.filmorate.customExceptions.InternalErrorException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.*;
 
-@Service
+@Service()
 @Slf4j
 public class UserService {
 
-    private final UserStorage userStorage;
+    private final UserDbStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(UserDbStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -59,13 +57,8 @@ public class UserService {
         if (user1Id == user2Id) {
             throw new ValidationException("Пользователь не может добавить себя в друзья :(");
         }
-        User user1;
-        User user2;
-        user1 = userStorage.getUserById(user1Id);
-        user2 = userStorage.getUserById(user2Id);
-        user1.getFriendIdList().add(user2Id);
-        user2.getFriendIdList().add(user1Id);
-        log.info("{} и {} стали друзьями", user1, user2);
+        userStorage.makeFriends(user1Id,user2Id);
+        log.info("{} и {} стали друзьями", user1Id, user2Id);
     }
 
     /**
@@ -76,13 +69,8 @@ public class UserService {
      */
     public void deleteFriend(int user1Id, int user2Id) {
 
-        User user1;
-        User user2;
-        user1 = userStorage.getUserById(user1Id);
-        user2 = userStorage.getUserById(user2Id);
-        user1.getFriendIdList().remove(user2Id);
-        user2.getFriendIdList().remove(user1Id);
-        log.info("{} и {} больше не друзья", user1, user2);
+        userStorage.deleteFriends(user1Id,user2Id);
+        log.info("{} и {} больше не друзья", user1Id, user2Id);
     }
 
     /**
@@ -95,11 +83,11 @@ public class UserService {
 
         HashSet<Integer> friendIdList;
         List<User> friendList = new ArrayList<>();
-        HashMap<Integer, User> userList = userStorage.getAllUsers();
         friendIdList = userStorage.getUserById(userId).getFriendIdList();
         for (int id : friendIdList) {
-            friendList.add(userList.get(id));
+            friendList.add(userStorage.getUserById(id));
         }
+        Collections.sort(friendList,(f1,f2)->f1.getId()-f2.getId());
         log.info("Передан список друзей пользователя id = {}", userId);
         return friendList;
     }
