@@ -234,8 +234,8 @@ public class FilmDao implements FilmStorage {
             SqlRowSet filmRows = getIdRowsFromDb(film);
             if (filmRows.next()) {
                 film.setId(filmRows.getInt(FilmTableConstants.FILM_ID));
+                deleteFilm(film.getId());
             }
-            deleteFilm(film.getId());
             throw new RuntimeException("SQL exception");
         }
 
@@ -325,6 +325,13 @@ public class FilmDao implements FilmStorage {
                 "DELETE FROM " + FilmTableConstants.TABLE_NAME
                         + " WHERE " + FilmTableConstants.FILM_ID + "= " + id);
         log.info("Удален пользователь {}", removingFilm);
+
+        if(getAllFilms().size()==0){
+            jdbcTemplate.execute(
+                    "ALTER TABLE "+FilmTableConstants.TABLE_NAME
+                    +" ALTER COLUMN "+FilmTableConstants.FILM_ID+" RESTART WITH 1");
+        }
+
         return removingFilm;
     }
 
@@ -340,6 +347,9 @@ public class FilmDao implements FilmStorage {
                     "DELETE FROM " + FilmTableConstants.TABLE_NAME
                             + " WHERE " + FilmTableConstants.FILM_ID + " = " + idsRows.getInt(FilmTableConstants.FILM_ID));
         }
+        jdbcTemplate.execute(
+                "ALTER TABLE "+FilmTableConstants.TABLE_NAME
+                        +" ALTER COLUMN "+FilmTableConstants.FILM_ID+" RESTART WITH 1");
 
         log.info("Таблица фильмов очищена");
     }

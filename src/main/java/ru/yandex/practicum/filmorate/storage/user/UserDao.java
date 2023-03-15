@@ -6,6 +6,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.constants.FilmTableConstants;
 import ru.yandex.practicum.filmorate.constants.FriendShipStatusConstants;
 import ru.yandex.practicum.filmorate.constants.FriendsListConstants;
 import ru.yandex.practicum.filmorate.constants.UserTableConstants;
@@ -78,21 +79,29 @@ public class UserDao implements UserDbStorage {
             log.info("Добавлен пользователь {}", user);
             return user;
         } catch (DataIntegrityViolationException | BadSqlGrammarException ex) {
-            deleteUser(findUserId(user));
+            SqlRowSet rowSet = getUserIdRow(user);
+            if(rowSet.next()){
+                deleteUser(rowSet.getInt(UserTableConstants.USER_ID));
+            }
             throw new RuntimeException("SQL exception");
         }
     }
 
     private int findUserId(User user) {
+        SqlRowSet usersRows = getUserIdRow(user);
+        if (usersRows.next()) {
+            return usersRows.getInt(UserTableConstants.USER_ID);
+        }
+        throw new DataNotFoundException("user not found");
+    }
+
+    private SqlRowSet getUserIdRow(User user){
         SqlRowSet usersRows = jdbcTemplate.queryForRowSet(
                 "SELECT " + UserTableConstants.USER_ID + "\n"
                         + "FROM " + UserTableConstants.TABLE_NAME + "\n"
                         + "WHERE " + UserTableConstants.LOGIN + "=? AND " + UserTableConstants.EMAIL + "=?"
                 , user.getLogin(), user.getEmail());
-        if (usersRows.next()) {
-            return usersRows.getInt(UserTableConstants.USER_ID);
-        }
-        throw new DataNotFoundException("user not found");
+        return usersRows;
     }
 
     /**
@@ -150,6 +159,12 @@ public class UserDao implements UserDbStorage {
                 "DELETE FROM " + UserTableConstants.TABLE_NAME
                         + " WHERE " + UserTableConstants.USER_ID + "= " + id);
         log.info("Удален пользователь {}", removingUser);
+        if(getAllUsers().size()==0){
+            jdbcTemplate.execute(
+                    "ALTER TABLE "+ UserTableConstants.TABLE_NAME
+                            +" ALTER COLUMN "+UserTableConstants.USER_ID+" RESTART WITH 1");
+        }
+
         return removingUser;
     }
 
@@ -164,6 +179,10 @@ public class UserDao implements UserDbStorage {
                     "DELETE FROM " + UserTableConstants.TABLE_NAME
                             + " WHERE " + UserTableConstants.USER_ID + "= " + idsRows.getInt(UserTableConstants.USER_ID));
         }
+
+        jdbcTemplate.execute(
+                "ALTER TABLE "+ UserTableConstants.TABLE_NAME
+                        +" ALTER COLUMN "+UserTableConstants.USER_ID+" RESTART WITH 1");
 
         log.info("Таблица пользователей очищена");
     }
@@ -181,6 +200,7 @@ public class UserDao implements UserDbStorage {
 
 
         insertIntoFriendList(userId, friendId, User.FriendStatus.ACCEPTED);
+        insertIntoFriendList(friendId, userId, User.FriendStatus.ACCEPTED);
         log.info("Пользователь {} и {} записаны в базу друзей", userId, friendId);
     }
 
@@ -275,57 +295,7 @@ public class UserDao implements UserDbStorage {
             user.getFriendIdList().add(friendID);
             user.getFriendStatuses().put(friendID, status);
         }
-/*
-       HashMap<String,Object> newFSMap = (HashMap<String, Object>) jdbcTemplate.queryForMap("SELECT fl."+FriendsListConstants.FRIEND_ID
-                +" fs."+FriendShipStatusConstants.FRIENDSHIP_STATUS_NAME+"\n"
-                + "FROM " + FriendsListConstants.TABLE_NAME + " AS fl\n"
-                + "INNER JOIN " + FriendShipStatusConstants.TABLE_NAME + " AS fs ON "
-                + "fs." + FriendShipStatusConstants.FRIENDSHIP_STATUS_ID
-                + " = fl." + FriendsListConstants.FRIENDSHIP_STATUS_ID + "\n"
-                + "WHERE " + FriendsListConstants.USER_ID + " = " + id);
 
-        for(Map.Entry<String,Object> entry: newFSMap.entrySet()){
-            user.getFriendStatuses().put(Integer.parseInt(entry.getKey()), User.FriendStatus.valueOf((String)entry.getValue()));
-        }
-
-        user.setFriendStatuses((HashMap<Integer, User.FriendStatus>) this.jdbcTemplate.query(
-                "SELECT *\n"
-                        + "FROM " + FriendsListConstants.TABLE_NAME + " AS fl\n"
-                        + "INNER JOIN " + FriendShipStatusConstants.TABLE_NAME + " AS fs ON "
-                        + "fs." + FriendShipStatusConstants.FRIENDSHIP_STATUS_ID
-                        + " = fl." + FriendsListConstants.FRIENDSHIP_STATUS_ID + "\n"
-                        + "WHERE " + FriendsListConstants.USER_ID + " = " + id,
-                (rows, rowNum) -> {
-                    HashMap<Integer, User.FriendStatus> newMap = new HashMap<>();
-                    while (rows.next()) {
-                        int friendID = rows.getInt(FriendsListConstants.FRIEND_ID);
-                        User.FriendStatus status = User.FriendStatus.valueOf(
-                                rows.getString(FriendShipStatusConstants.FRIENDSHIP_STATUS_NAME));
-                        newMap.put(friendID, status);
-                    }
-                    return newMap;
-                }));
-
-        List friendList =
-                this.jdbcTemplate.query(
-                        "SELECT *\n"
-                                + "FROM " + FriendsListConstants.TABLE_NAME + " AS fl\n"
-                                + "INNER JOIN " + FriendShipStatusConstants.TABLE_NAME + " AS fs ON "
-                                + "fs." + FriendShipStatusConstants.FRIENDSHIP_STATUS_ID
-                                + " = fl." + FriendsListConstants.FRIENDSHIP_STATUS_ID + "\n"
-                                + "WHERE " + FriendsListConstants.USER_ID + " = " + id,
-                        (rows, rowNum) -> {
-                            List<Integer> newMap = new ArrayList<>();
-                            while (rows.next()) {
-                                int friendID = rows.getInt(FriendsListConstants.FRIEND_ID);
-                                newMap.add(friendID);
-                            }
-                            return newMap;
-                        });
-
-        user.setFriendIdList(new HashSet<>(friendList));
-
- */
         return user;
     }
 
