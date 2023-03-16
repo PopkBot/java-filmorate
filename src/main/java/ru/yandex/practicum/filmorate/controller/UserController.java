@@ -22,8 +22,14 @@ public class UserController {
         this.userService=userService;
     }
 
+    @DeleteMapping("/users/{id}")
+    public User deleteAllUsers(@PathVariable int id){
+        log.info("Запрос: удалить пользователя с id {}",id);
+        return userService.deleteUserById(id);
+    }
+
     @DeleteMapping("/users")
-    public void deleteAllUsers(){
+    public void deleteUsers(){
         log.info("Запрос: удалить всех пользователей");
         userService.deleteAllUsers();
     }

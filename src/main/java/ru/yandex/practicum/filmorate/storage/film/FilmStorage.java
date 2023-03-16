@@ -21,5 +21,12 @@ public interface FilmStorage {
 
     public void deleteAllFilms();
 
+    public void addLike(int filmId,int userId);
+
+    public void deleteLike(int filmId,int userId);
+
+    public boolean isPresentInDataBase(Film film);
+
+    public boolean isPresentInDataBase(int filmId);
 
 }

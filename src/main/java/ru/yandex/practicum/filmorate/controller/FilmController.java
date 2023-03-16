@@ -2,8 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.Constants;
+import ru.yandex.practicum.filmorate.constants.Constants;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -17,6 +18,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @Autowired
+
     public FilmController(FilmService filmService){
         this.filmService=filmService;
     }
@@ -25,6 +27,12 @@ public class FilmController {
     public void deleteAllFilms(){
         log.info("Запрос: удалить все фильмы");
         filmService.deleteAllFilms();
+    }
+
+    @DeleteMapping("/films/{id}")
+    public void deleteAllFilms(@PathVariable int id){
+        log.info("Запрос: удалить фильм {}",id);
+        filmService.deleteFilmById(id);
     }
 
     @PostMapping("/films")
